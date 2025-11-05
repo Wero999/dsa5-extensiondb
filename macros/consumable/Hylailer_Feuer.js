@@ -1,9 +1,5 @@
 // This is a system macro used for automation. It is disfunctional without the proper context.
 
-// Hinweis: Angriff/Item-Makro (nicht SF). Charakter = actor (sourceActorDoc = actor), Ziel = game.user.targets[0].
-// Burning wird ausschließlich über die DSA5-Condition-API gesetzt/erhöht (interaktiv).
-// Wenn Brennend entfernt wird, endet auch der periodische Tick.
-
 const lang = game.i18n.lang == "de" ? "de" : "en";
 const dict = {
   de: {
@@ -72,7 +68,7 @@ async function effectRounds(q) {
 const reach = "2/4/8";
 const rounds = await effectRounds(qs);
 
-// args3: Wurf abhängig von QS; nach Treffer: Malus-Effekt + Burning ; Tick alle 5 KR und Stop bei Entfernen
+// args3: Prüfung abhängig von QS; nach Treffer: Malus-Effekt + Burning via Condition-API; Tick alle 5 KR und Stop bei Entfernen
 const args3Script = `
 // This is a system macro used for automation. It is disfunctional without the proper context.
 const utils = foundry.utils;
@@ -80,26 +76,20 @@ if (!actor) {
   ui.notifications.error("${L("ctxMissing")}");
   return;
 }
-
-// QS aus Außenvariable "qs"
+// QS aus Außenvariable "qs" 
 const triggerQS = Number(qs);
-
-// Wurf-Tabelle: QS1: 1-2, QS2: 1-3, QS3: 1-3, QS4: 1-4, QS5: 1-4, QS6: 1-5
+// Gate-Tabelle: QS1: 1-2, QS2: 1-3, QS3: 1-3, QS4: 1-4, QS5: 1-4, QS6: 1-5
 const gates = { 1:2, 2:3, 3:3, 4:4, 5:4, 6:5 };
 const gate = gates[triggerQS] ?? 2;
-
-// W6-Wurf und Wurfvergleich
+// W6-Wurf und Vergleich
 const gateRoll = await (new Roll("1d6")).evaluate();
 const passed = (gateRoll.total <= gate);
-
 // Einfache Chatmeldung
 ChatMessage.create({ content: passed ? "${L("transferSuccess")}" : "${L("transferBlocked")}" });
 if (!passed) return;
-
 // Dauer: 6 Sekunden pro KR
 const currentWorldTime = game.time.worldTime || 0;
 const secondsTotal = (${rounds}) * 6;
-
 // 1) Skill-Malus als eigener Effekt
 const skillEff = {
   name: "${L("nameelixir")} - ${L("koerperbeherrschung")} Malus",
@@ -113,8 +103,7 @@ const skillEff = {
   transfer: false
 };
 await actor.createEmbeddedDocuments("ActiveEffect", [skillEff]);
-
-// 2) Burning 
+// 2) Burning ausschließlich über Condition-API setzen/erhöhen
 async function addBurningCondition() {
   if (typeof actor.addCondition === "function") {
     await actor.addCondition("burning");
@@ -134,17 +123,14 @@ async function addBurningCondition() {
     await actor.createEmbeddedDocuments("ActiveEffect", [condEff]);
   }
 }
-
 // Initial sofort 1x Brennend hinzufügen/erhöhen
 await addBurningCondition();
-
 // Periodisch alle 5 KR erneut (nur bei aktivem Kampf) UND bei Entfernen von Brennend stoppen
 try {
   const combat = game.combat;
   const tickFlagPath = "flags.hylailFireTick";
   let tickHandler = null;
   let stopHandlers = [];
-
   // Helper: Tick stoppen (Flag deaktivieren, Hook entfernen, Stop-Hooks entfernen)
   const stopTick = async () => {
     const flag = foundry.utils.getProperty(actor, tickFlagPath);
@@ -161,7 +147,6 @@ try {
     stopHandlers = [];
     ChatMessage.create({ content: "${L("tickStopped")}" });
   };
-
   // Stop-Listener: wenn Burning-Condition am Actor entfernt wird
   const aeRemovedHandler = async (effect, options, userId) => {
     try {
@@ -172,7 +157,6 @@ try {
   };
   Hooks.on("deleteActiveEffect", aeRemovedHandler);
   stopHandlers.push({ hook: "deleteActiveEffect", fn: aeRemovedHandler });
-
   const itemRemovedHandler = async (item, options, userId) => {
     try {
       if (item?.parent?.id !== actor.id) return;
@@ -182,7 +166,6 @@ try {
   };
   Hooks.on("deleteItem", itemRemovedHandler);
   stopHandlers.push({ hook: "deleteItem", fn: itemRemovedHandler });
-
   if (!combat) {
     console.warn("Hylailic Fire: kein aktiver Kampf – periodischer Tick wird nicht registriert, Stop-Listener bleiben aktiv.");
     await actor.update({ [tickFlagPath]: { active: true, lastAppliedRound: null, endRound: null } });
@@ -190,18 +173,15 @@ try {
     const startRound = combat.round ?? 0;
     const endRound = startRound + ${rounds};
     await actor.update({ [tickFlagPath]: { active: true, lastAppliedRound: startRound, endRound } });
-
     tickHandler = async (cmbt, changed, options, userId) => {
       if (cmbt.id !== combat.id) return;
       const currentRound = cmbt?.round ?? 0;
       const flag = foundry.utils.getProperty(actor, tickFlagPath);
       if (!flag?.active) return;
-
       if (flag.endRound != null && currentRound >= flag.endRound) {
         await stopTick();
         return;
       }
-
       const delta = currentRound - (flag.lastAppliedRound ?? currentRound);
       if (delta >= 5) {
         await addBurningCondition();
@@ -209,7 +189,6 @@ try {
         ChatMessage.create({ content: "${L("tickMsg")}" });
       }
     };
-
     Hooks.on("updateCombat", tickHandler);
   }
 } catch (e) {
