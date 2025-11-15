@@ -244,7 +244,7 @@ const PACKS = {
       { name: "Eisleiche/Eiskadaver",        uuid: "Compendium.dsa5-necromantheum.necromantheumequipment.Item.QV0J2XQTPD2bpGw2" },
       { name: "Lebender Leichnam/Kadaver",   uuid: "Compendium.dsa5-necromantheum.necromantheumequipment.Item.t5Qd4ZQSJdvR659n" },
       { name: "Moorleiche/Moorkadaver",      uuid: "Compendium.dsa5-necromantheum.necromantheumequipment.Item.ZYsbRLmnahm5EW4o" },
-      { name: "Wasserleiche/Wasserkadaver",  uuid: "Compendium.dsa5-necromantheumequipment.Item.LtkGA5O3nQHtxMlC" },
+      { name: "Wasserleiche/Wasserkadaver",  uuid: "Compendium.dsa5-necromantheum.necromantheumequipment.Item.LtkGA5O3nQHtxMlC" },
     ],
     skelett: [
       { name: "Erhaltenes Skelett",                   uuid: "Compendium.dsa5-necromantheum.necromantheumequipment.Item.W9mFlprSHb65Klud" },
