@@ -64,7 +64,7 @@ const dict = {
         noSelection: "You haven't selected anything to smoke!",
         chatMessage: "lights a pipe with pleasure.",
 
-        // Item Names (English - Provisional Translations)
+        // Item Names 
         tobaccoNames: [
             "Knaster",
             "Methumis Tobacco",
@@ -87,7 +87,6 @@ const dict = {
     }
 }[lang];
 
-// --- LOGIK ---
 
 // Sicherheitscheck
 if (typeof actor === 'undefined' || !actor) {
@@ -95,20 +94,17 @@ if (typeof actor === 'undefined' || !actor) {
     return;
 }
 
-// Funktion zum Suchen der Items im Inventar
+
 function findItems(names) {
     return actor.items.filter(i => names.includes(i.name) && i.system.quantity.value > 0);
 }
 
-// Inventar scannen (Nutzt jetzt die Listen aus dem Dictionary)
 const availableTobacco = findItems(dict.tobaccoNames);
 const availableHerbs = findItems(dict.herbNames);
 
-// Globale Variablen
 let selectedTobaccoId = null;
 let selectedHerbId = null;
 
-// HTML Template
 let content = `
 <div class="dsa5-smoking-macro" style="height: 100%; overflow-y: auto; padding-bottom: 10px;">
     
@@ -133,7 +129,7 @@ let content = `
 </div>
 `;
 
-// Dialog erstellen
+// Dialog
 let d = new Dialog({
     title: dict.dialogTitle,
     content: content,
@@ -153,7 +149,7 @@ let d = new Dialog({
                     content: `${actor.name} ${dict.chatMessage}`
                 });
 
-                // Helper: Effekt mit Self-Target auslösen
+                // Effekt mit Self-Target auslösen
                 const triggerItem = async (itemId) => {
                     const item = actor.items.get(itemId);
                     if(!item) return;
@@ -211,7 +207,6 @@ let d = new Dialog({
 
 d.render(true);
 
-// --- Hilfsfunktionen ---
 
 function updateSelectionArea(html, mode) {
     const container = html.find('#selection-area');
@@ -264,7 +259,7 @@ function buildSlotHTML(label, slotId, items, listClass) {
 
 function attachItemListeners(html) {
     
-    // --- TABAK LOGIK ---
+    // TABAK LOGIK
     html.find('.tobacco-list').click(ev => {
         const id = ev.currentTarget.dataset.id;
         const item = actor.items.get(id);
@@ -287,7 +282,7 @@ function attachItemListeners(html) {
         actor.items.get(id)?.sheet.render(true);
     });
 
-    // --- KRAUT LOGIK ---
+    // KRAUT LOGIK
     html.find('.herb-list').click(ev => {
         const id = ev.currentTarget.dataset.id;
         const item = actor.items.get(id);
