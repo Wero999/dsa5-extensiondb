@@ -1,5 +1,3 @@
-// This is a system macro used for automation. It is disfunctional without the proper context.
-
 const lang = game.i18n.lang == "de" ? "de" : "en";
 
 const dict = {
@@ -22,7 +20,7 @@ const dict = {
         cancel: "Abbrechen",
         noSelection: "Du hast nichts zum Rauchen ausgewählt!",
         chatMessage: "zündet sich genüsslich eine Pfeife an.",
-        
+
         // Item Namen (Deutsch)
         tobaccoNames: [
             "Knaster",
@@ -107,7 +105,7 @@ let selectedHerbId = null;
 
 let content = `
 <div class="dsa5-smoking-macro" style="height: 100%; overflow-y: auto; padding-bottom: 10px;">
-    
+
     <div style="margin-bottom: 10px;">
         <p style="font-family: 'Times New Roman', serif; font-size: 10pt; font-style: italic; margin-bottom: 5px;">${dict.header}</p>
     </div>
@@ -142,7 +140,7 @@ let d = new Dialog({
                     ui.notifications.warn(dict.noSelection);
                     return;
                 }
-                
+
                 // Fluff-Text
                 ChatMessage.create({
                     speaker: ChatMessage.getSpeaker({actor: actor}),
@@ -231,11 +229,14 @@ function updateSelectionArea(html, mode) {
 
 function buildSlotHTML(label, slotId, items, listClass) {
     let listHTML = `<div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px;">`;
-    
+
     items.forEach(item => {
         listHTML += `
-            <div class="item-icon ${listClass}" data-id="${item.id}" title="${item.name}" 
-                 style="width: 32px; height: 32px; border: 1px solid #999; cursor: pointer; background-image: url('${item.img}'); background-size: cover;">
+            <div style="display: flex; flex-direction: column; align-items: center; width: 34px;">
+                <div class="item-icon ${listClass}" data-id="${item.id}" title="${item.name}" 
+                     style="width: 32px; height: 32px; border: 1px solid #999; cursor: pointer; background-image: url('${item.img}'); background-size: cover;">
+                </div>
+                <span style="font-size: 10px; color: #333; margin-top: 2px;">${item.system.quantity.value}</span>
             </div>`;
     });
     listHTML += `</div>`;
@@ -243,11 +244,11 @@ function buildSlotHTML(label, slotId, items, listClass) {
     return `
         <div style="text-align: center; margin-bottom: 10px;">
             <label style="font-weight: bold;">${label}</label>
-            
+
             <div id="${slotId}" title="${dict.slotTooltip}"
                  style="width: 48px; height: 48px; border: 2px dashed #777; margin: 5px auto; background-size: cover; background-position: center; cursor: pointer;">
             </div>
-            
+
             <div id="${slotId}-name" style="min-height: 1.2em; font-size: 0.9em; font-weight: bold; color: #444; margin-bottom: 5px;"></div>
 
             <div style="margin-top: 5px; border-top: 1px solid #ccc; padding-top: 5px;">
@@ -258,13 +259,13 @@ function buildSlotHTML(label, slotId, items, listClass) {
 }
 
 function attachItemListeners(html) {
-    
+
     // TABAK LOGIK
     html.find('.tobacco-list').click(ev => {
         const id = ev.currentTarget.dataset.id;
         const item = actor.items.get(id);
         selectedTobaccoId = id;
-        
+
         html.find('#tobacco-slot').css('background-image', `url('${item.img}')`);
         html.find('#tobacco-slot').css('border', `2px solid #000`);
         html.find('#tobacco-slot-name').text(item.name);
@@ -287,7 +288,7 @@ function attachItemListeners(html) {
         const id = ev.currentTarget.dataset.id;
         const item = actor.items.get(id);
         selectedHerbId = id;
-        
+
         html.find('#herb-slot').css('background-image', `url('${item.img}')`);
         html.find('#herb-slot').css('border', `2px solid #000`);
         html.find('#herb-slot-name').text(item.name);
@@ -309,9 +310,9 @@ function attachItemListeners(html) {
 async function consumeItem(itemId) {
     const item = actor.items.get(itemId);
     if (!item) return;
-    
+
     const currentQty = item.system.quantity.value;
-    
+
     if (currentQty <= 1) {
         await actor.deleteEmbeddedDocuments("Item", [itemId]);
     } else {
