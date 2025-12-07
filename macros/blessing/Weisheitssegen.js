@@ -8,14 +8,16 @@ const dict = {
     notEnoughKap: (name) => { return `${name} hat nicht genügend Karmaenergie.` },
     onlySingleTarget: "Bitte genau ein Ziel anvisieren.",
     targetNoActor: "Das Ziel ist kein Akteur.",
-    wisdomMessage: (user, target) => { return `<p>${user} spricht einen Weisheitssegen auf ${target}.</p>` }
+    wisdomMessage: (user, target) => { return `<p>${user} spricht einen Weisheitssegen auf ${target}.</p>` },
+    effectName: "Weisheitssegen"
   },
   en: {
     noKap: (name) => { return `${name} does not have karma energy.` },
     notEnoughKap: (name) => { return `${name} does not have enough karma energy.` },
     onlySingleTarget: "Please target exactly one target.",
     targetNoActor: "The target is not an actor.",
-    wisdomMessage: (user, target) => { return `<p>${user} casts a wisdom blessing on ${target}.</p>` }
+    wisdomMessage: (user, target) => { return `<p>${user} casts a wisdom blessing on ${target}.</p>` },
+    effectName: "Wisdom Blessing"
   }
 }[lang];
 
@@ -50,7 +52,7 @@ if (!targetActor) {
 await userActor.update({ "system.status.karmaenergy.value": kapObject.value - 1 });
 
 const effectData = {
-    name: "Weisheitssegen",
+    name: dict.effectName,
     icon: "icons/svg/aura.svg",   
     duration: {
         seconds: 43200               
