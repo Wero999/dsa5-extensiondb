@@ -8,7 +8,7 @@ const dict = {
     notEnoughKap: (name) => { return `${name} hat nicht genügend Karmaenergie.` },
     onlySingleTarget: "Bitte genau ein Ziel anvisieren.",
     targetNoActor: "Das Ziel ist kein Akteur.",
-    gluckMessage: (user, target) => { return `<p>${user} spricht einen Glückssegen für ${target}.</p>` }
+    gluckMessage: (user, target) => { return `<p>${user} spricht einen Glückssegen auf ${target}.</p>` }
   },
   en: {
     noKap: (name) => { return `${name} does not have karma energy.` },
