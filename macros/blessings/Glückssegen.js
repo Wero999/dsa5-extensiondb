@@ -17,7 +17,7 @@ const dict = {
     onlySingleTarget: "Please target exactly one target.",
     targetNoActor: "The target is not an actor.",
     gluckMessage: (user, target) => { return `<p>${user} casts a luck blessing on ${target}.</p>` },
-    effectName: "Luckblessing"
+    effectName: "Luck Blessing"
   }
 }[lang];
 
