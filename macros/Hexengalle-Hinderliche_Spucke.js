@@ -1,14 +1,27 @@
 // transform spell source data object
 
+const lang = game.i18n.lang == "de" ? "de" : "en";
+const dict = {
+  de: {
+    extensionLabel: "Zaubererweiterung",
+    effectName: "Hinderliche Spucke"
+  },
+  en: {
+    extensionLabel: "Spell Extension",
+    effectName: "Hindering Spit"
+  }
+}[lang];
+
+
 const spitScript = `
 {
-    const effectName = "Hinderliche Spucke";
+    const effectName = "${dict.effectName}";
     const existing = actor.effects.find(e => e.name === effectName);
 
     if (!existing) {
         const effectData = {
             name: effectName,
-            img: "icons/svg/degen.svg",
+            img: "icons/svg/aura.svg",
             changes: [
                 { key: "system.rangeStats.attack", mode: 2, value: -1 },
                 { key: "system.status.dodge.gearmodifier", mode: 2, value: -1 },
@@ -30,16 +43,19 @@ let macroEffect = source.effects.find(x => x.flags?.dsa5?.args3);
 if (macroEffect) {
     macroEffect = foundry.utils.duplicate(macroEffect);
     source.effects = source.effects.filter(x => x._id != macroEffect._id);
+    
     macroEffect.flags.dsa5.args3 = `${spitScript}\n${macroEffect.flags.dsa5.args3}`;
+    
     source.effects.push(macroEffect);
 } else {
     const newEffect = {
         _id: foundry.utils.randomID(),
-        name: "Zaubererweiterung (Spucke)",
-        img: "icons/svg/acid.svg",
+        name: `${dict.extensionLabel} (${dict.effectName})`,
+        img: "icons/svg/aura.svg",
         changes: [],
         transfer: false,
         flags: { dsa5: { advancedFunction: 2, args3: spitScript } }
     };
     source.effects.push(newEffect);
+}
 }
