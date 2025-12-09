@@ -15,7 +15,7 @@ const injection = `
     img: "icons/svg/aura.svg",
     transfer: false,
     changes: [
-      { key: "system.skillModifiers.FP", mode: 0, value: "Ruf der Feenwesen 2, Zauberwesen der Natur 2" }
+      { key: "system.skillModifiers.FP", mode: 0, value: "Invocatio Minor 2, Invocatio Maior 2, Invocatio Maxima 2" }
     ]
   }],
 `;
