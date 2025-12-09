@@ -63,7 +63,7 @@ if (macroEffect) {
     const newEffect = {
         _id: foundry.utils.randomID(),
         name: `${dict.extensionLabel} (${dict.effectName})`,
-        img: "icons/svg/daze.svg",
+        img: "icons/svg/aura.svg",
         changes: [],
         transfer: false,
         flags: { dsa5: { advancedFunction: 2, args3: afterEffectScript } }
