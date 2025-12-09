@@ -1,29 +1,27 @@
 // transform spell source data object
 
 const spitScript = `
-// Prüfen, ob der Effekt bereits existiert (Nicht kumulativ)
-const effectName = "Hinderliche Spucke";
-const existing = actor.effects.find(e => e.name === effectName);
+{
+    const effectName = "Hinderliche Spucke";
+    const existing = actor.effects.find(e => e.name === effectName);
 
-if (!existing) {
-    const effectData = {
-        name: effectName,
-        img: "icons/svg/aura.svg",
-        changes: [
-            { key: "system.rangeStats.attack", mode: 2, value: -1 },
-            { key: "system.status.dodge.gearmodifier", mode: 2, value: -1 },
-            { key: "system.meleeStats.attack", mode: 2, value: -1 },
-            { key: "system.meleeStats.parry", mode: 2, value: -1 },
-            { key: "system.skillModifiers.global", mode: 2, value: -1 }
-        ],
-        flags: {
-            dsa5: {
-                description: effectName
+    if (!existing) {
+        const effectData = {
+            name: effectName,
+            img: "icons/svg/degen.svg",
+            changes: [
+                { key: "system.rangeStats.attack", mode: 2, value: -1 },
+                { key: "system.status.dodge.gearmodifier", mode: 2, value: -1 },
+                { key: "system.meleeStats.attack", mode: 2, value: -1 },
+                { key: "system.meleeStats.parry", mode: 2, value: -1 },
+                { key: "system.skillModifiers.global", mode: 2, value: -1 }
+            ],
+            flags: {
+                dsa5: { description: effectName }
             }
-        }
-    };
-    
-    await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
+        };
+        await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
+    }
 }
 `;
 
@@ -32,24 +30,16 @@ let macroEffect = source.effects.find(x => x.flags?.dsa5?.args3);
 if (macroEffect) {
     macroEffect = foundry.utils.duplicate(macroEffect);
     source.effects = source.effects.filter(x => x._id != macroEffect._id);
-
     macroEffect.flags.dsa5.args3 = `${spitScript}\n${macroEffect.flags.dsa5.args3}`;
     source.effects.push(macroEffect);
-
 } else {
     const newEffect = {
         _id: foundry.utils.randomID(),
         name: "Zaubererweiterung (Spucke)",
-        img: "icons/svg/aura.svg",
+        img: "icons/svg/acid.svg",
         changes: [],
         transfer: false,
-        flags: {
-            dsa5: {
-                advancedFunction: 2,
-                args3: spitScript
-            }
-        }
+        flags: { dsa5: { advancedFunction: 2, args3: spitScript } }
     };
-    
     source.effects.push(newEffect);
 }
