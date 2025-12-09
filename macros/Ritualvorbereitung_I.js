@@ -13,7 +13,7 @@ const injection = `
   effects: [{
     name: dict.itemName,
     img: "icons/svg/aura.svg",
-    transfer: true,
+    transfer: false,
     changes: [
       { key: "system.skillModifiers.FP", mode: 0, value: "Geisterruf 1, Geisterbeschwörung 1" }
     ]
