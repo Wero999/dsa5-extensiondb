@@ -1,30 +1,40 @@
 // transform spell source data object
 
+const lang = game.i18n.lang == "de" ? "de" : "en";
+const dict = {
+  de: {
+    extensionLabel: "Zaubererweiterung",
+    effectName: "Nachwirkung",
+    chatMsg: "{name} erleidet {damage} Schaden durch Nachwirkung."
+  },
+  en: {
+    extensionLabel: "Spell Extension",
+    effectName: "Aftereffect",
+    chatMsg: "{name} suffers {damage} damage from Aftereffect."
+  }
+}[lang];
+
 const afterEffectScript = `
 {
-    const effectName = "Nachwirkung";
+    const effectName = "${dict.effectName}";
     const existing = actor.effects.find(e => e.name === effectName);
 
-    // Nur erstellen, wenn noch nicht vorhanden
     if (!existing) {
         // Fallback für QS, falls Makro manuell getestet wird
         const safeQs = (typeof qs !== "undefined") ? qs : 1;
         
-        // Schadensformel: 1d3 + (QS / 2 abgerundet)
         const dmgVal = "1d3 + " + Math.floor(safeQs / 2);
 
-        // Das Skript, das beim Entfernen ausgeführt wird.
-        // Wir nutzen .evaluate() ohne {async: true}, da dies in Skript-Strings sicherer ist, 
-        // oder wir verlassen uns auf den Standard.
         const removeScript = "const damageRoll = await new Roll('" + dmgVal + "').evaluate(); " +
                              "await actor.applyDamage(damageRoll.total); " +
-                             "ChatMessage.create({speaker: ChatMessage.getSpeaker({ actor: actor }), content: actor.name + ' erleidet ' + damageRoll.total + ' Schaden durch Nachwirkung.'});";
+                             "const msg = '${dict.chatMsg}'.replace('{name}', actor.name).replace('{damage}', damageRoll.total); " +
+                             "ChatMessage.create({speaker: ChatMessage.getSpeaker({ actor: actor }), content: msg});";
 
         const effectData = {
             name: effectName,
-            img: "icons/svg/daze.svg", 
+            img: "icons/svg/aura.svg", 
             duration: {
-                rounds: 1, // 1 KR entspricht 5 Sekunden - das ist stabiler für den Combat Tracker
+                rounds: 1, // 1 KR = 5 Sekunden
                 seconds: null
             },
             flags: {
@@ -52,7 +62,7 @@ if (macroEffect) {
 } else {
     const newEffect = {
         _id: foundry.utils.randomID(),
-        name: "Hexengalle (Nachwirkung)",
+        name: `${dict.extensionLabel} (${dict.effectName})`,
         img: "icons/svg/daze.svg",
         changes: [],
         transfer: false,
