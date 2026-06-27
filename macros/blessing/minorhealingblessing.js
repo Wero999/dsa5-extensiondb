@@ -1,8 +1,15 @@
-// This is a system macro used for automation. It is disfunctional without the proper context.
+// Schema type: onUseEffect
+// Parameters injected by the system:
+//   args   {OnUseEffectExecutionArgs} - Execution metadata for this activation.
+//   item   {Itemdsa5} - The item that was used.
+//   actor  {Actordsa5} - The actor who used the item.
+//   this   {OnUseEffect} - Helper instance (socketedConditionAdd, effectDummy, createChatMessage, ...).
+
 
 const lang = game.i18n.lang == "de" ? "de" : "en"
 const dict = {
   de: {
+    noActor: "Kein gueltiger Akteur gefunden.",
     noKap: (name) => { return `${name} verfügt nicht über Karmaenergie.` },
     notEnoughKap: (name) => { return `${name} hat nicht genügend Karmaenergie.` },
     onlySingleTarget: "Bitte genau ein Ziel anvisieren.",
@@ -10,6 +17,7 @@ const dict = {
     healMessage: (user, target) => { return `<p>${user} wendet einen kleinen Heilsegen auf ${target} an.</p>` }
   },
   en: {
+    noActor: "No valid actor found.",
     noKap: (name) => { return `${name} does not have karma energy.` },
     notEnoughKap: (name) => { return `${name} does not have enough karma energy.` },
     onlySingleTarget: "Please target exactly one target.",
@@ -19,6 +27,15 @@ const dict = {
 }[lang];
 
 const userActor = actor;
+
+if (!userActor) {
+  ui.notifications.warn(dict.noActor);
+  return;
+}
+
+const sendMessage = async (message) => {
+  await ChatMessage.create(game.dsa5.apps.DSA5_Utility.chatDataSetup(message, args?.messageMode));
+};
 
 // 2) 1 KaP (Karmaenergie) abziehen
 const kapObject = foundry.utils.getProperty(userActor, "system.status.karmaenergy");
@@ -50,7 +67,4 @@ const newWounds = Math.min(targetActor.system.status.wounds.value + 1, targetAct
 await this.socketedActorTransformation([target.id], { "system.status.wounds.value": newWounds });
 
 // Heilungsnachricht
-ChatMessage.create({
-  speaker: ChatMessage.getSpeaker({ actor: userActor }),
-  content: dict.healMessage(userActor.name, target.name)
-});
+await sendMessage(dict.healMessage(userActor.name, target.name));

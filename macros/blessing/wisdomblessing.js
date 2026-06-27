@@ -1,4 +1,12 @@
+// Schema type: onUseEffect
+// Parameters injected by the system:
+//   args   {OnUseEffectExecutionArgs} - Execution metadata for this activation.
+//   item   {Itemdsa5} - The item that was used.
+//   actor  {Actordsa5} - The actor who used the item.
+//   this   {OnUseEffect} - Helper instance (socketedConditionAdd, effectDummy, createChatMessage, ...).
 // This is a system macro used for automation.
+// Issues:
+// - Routes the target ActiveEffect through the socketed condition helper because the target may not be owned by the invoking player.
 
 const lang = game.i18n.lang == "de" ? "de" : "en";
 
@@ -51,29 +59,23 @@ if (!targetActor) {
 
 await userActor.update({ "system.status.karmaenergy.value": kapObject.value - 1 });
 
-const effectData = {
-  name: dict.effectName,
-  img: "icons/svg/aura.svg",
-  duration: {
-    seconds: 43200
-  },
-  changes: [
-    {
-      key: "system.skillModifiers.postRoll.reroll",
-      mode: 0,
-      value: `knowledge 1`
-    }
-  ],
-  flags: {
-    dsa5: {
-      charges: { max: 1, value: 1 }
-    }
+const effectData = this.effectDummy(dict.effectName, [
+  {
+    key: "system.skillModifiers.postRoll.reroll",
+    type: "custom",
+    value: `knowledge 1`
   }
-};
+], { value: 43200, units: "seconds" });
+foundry.utils.mergeObject(effectData, {
+  system: {
+    charges: { max: 1, value: 1 },
+  },
+});
 
-await targetActor.createEmbeddedDocuments("ActiveEffect", [effectData]);
+await this.socketedConditionAddActor([targetActor], effectData);
 
 ChatMessage.create({
   speaker: ChatMessage.getSpeaker({ actor: userActor }),
-  content: dict.wisdomMessage(userActor.name, target.name)
+  content: dict.wisdomMessage(userActor.name, target.name),
+  messageMode: args?.messageMode,
 });

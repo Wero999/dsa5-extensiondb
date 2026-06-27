@@ -1,9 +1,16 @@
+// Schema type: onUseEffect
+// Parameters injected by the system:
+//   args   {OnUseEffectExecutionArgs} - Execution metadata for this activation.
+//   item   {Itemdsa5} - The item that was used.
+//   actor  {Actordsa5} - The actor who used the item.
+//   this   {OnUseEffect} - Helper instance (socketedConditionAdd, effectDummy, createChatMessage, ...).
 // This is a system macro used for automation.
 
 const lang = game.i18n.lang == "de" ? "de" : "en";
 
 const dict = {
   de: {
+    noActor: "Kein gueltiger Akteur gefunden.",
     noKap: (name) => { return `${name} verfügt nicht über Karmaenergie.` },
     notEnoughKap: (name) => { return `${name} hat nicht genügend Karmaenergie.` },
     onlySingleTarget: "Bitte genau ein Ziel anvisieren.",
@@ -12,6 +19,7 @@ const dict = {
     effectName: "Glückssegen"
   },
   en: {
+    noActor: "No valid actor found.",
     noKap: (name) => { return `${name} does not have karma energy.` },
     notEnoughKap: (name) => { return `${name} does not have enough karma energy.` },
     onlySingleTarget: "Please target exactly one target.",
@@ -22,6 +30,15 @@ const dict = {
 }[lang];
 
 const userActor = actor;
+
+if (!userActor) {
+  ui.notifications.warn(dict.noActor);
+  return;
+}
+
+const sendMessage = async (message) => {
+  await ChatMessage.create(game.dsa5.apps.DSA5_Utility.chatDataSetup(message, args?.messageMode));
+};
 
 const kapObject = foundry.utils.getProperty(userActor, "system.status.karmaenergy");
 
@@ -50,32 +67,22 @@ if (!targetActor) {
 }
 
 
-await userActor.update({ "system.status.karmaenergy.value": kapObject.value - 1 });
+await userActor.applyMana(1, "KaP");
 
-const effectData = {
-  name: dict.effectName,
-  img: "icons/svg/aura.svg",
-  duration: {
-    seconds: 43200
+const effectData = this.effectDummy(dict.effectName, [
+  {
+    key: "system.skillModifiers.postRoll.FP",
+    type: "custom",
+    value: "any 1",
   },
-  changes: [
-    {
-      key: "system.skillModifiers.postRoll.FP",
-      mode: 0,
-      value: `any 1`
-    }
-  ],
-  flags: {
-    dsa5: {
-      charges: { max: 1, value: 1 }
-    }
-  }
-};
+], { value: 43200, units: "seconds" });
 
-
-await targetActor.createEmbeddedDocuments("ActiveEffect", [effectData]);
-
-ChatMessage.create({
-  speaker: ChatMessage.getSpeaker({ actor: userActor }),
-  content: dict.gluckMessage(userActor.name, target.name)
+foundry.utils.mergeObject(effectData, {
+  system: {
+    charges: { max: 1, value: 1 },
+  },
 });
+
+await targetActor.addCondition(effectData);
+
+await sendMessage(dict.gluckMessage(userActor.name, target.name));

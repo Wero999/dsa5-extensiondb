@@ -17,5 +17,12 @@ const dict = {
     }
 }[lang]
 
-origEffect.flags.dsa5.args3 = `msg += \` \${actor.name} ${dict.msg}.\`;\nawait actor.addCondition('burning')`
+
+const setMacroCommand = (entry, command) => {
+  entry.system ??= {};
+  entry.system.macroArgs ??= {};
+  entry.system.advancedFunction = 2;
+  entry.system.macroArgs.macro = command;
+};
+setMacroCommand(origEffect, `msg += \` \${actor.name} ${dict.msg}.\`;\nawait actor.addCondition('burning')`)
 source.effects.push(origEffect)
