@@ -5,13 +5,13 @@ const dict = {
   de: {
     itemName: "Geisteressenz",
     flavor: "Ektoplasmatische Manifestation",
-    info: (name, qs) => `Ektoplasma kondensiert aus der Luft und verfestigt sich im Besitz von <b>${name}</b> zu <b>${qs}x Geisteressenz</b>.`,
+    info: (name, qs) => `Essenz aus der vierten Sphäre kondensiert aus der Luft und verfestigt sich im Besitz von <b>${name}</b> zu <b>${qs}x Geisteressenz</b>.`,
     noActor: "Kein gültiges Ziel (Actor) vorhanden."
   },
   en: {
     itemName: "Phantom Essence",
     flavor: "Ectoplasmic Manifestation",
-    info: (name, qs) => `Ectoplasm condenses from the air and solidifies in <b>${name}'s</b> possession into <b>${qs}x Phantom Essence</b>.`,
+    info: (name, qs) => `Essence from the Fourth Sphere condenses from the air and solidifies in <b>${name}'s</b> possession into <b>${qs}x Ghost Essence</b>.`,
     noActor: "No valid target (Actor) found."
   }
 }[lang];
