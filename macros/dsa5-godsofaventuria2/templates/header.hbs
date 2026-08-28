@@ -1,0 +1,78 @@
+<div class="gods-menu-header">
+  {{#if actor}}
+  <div class="row-section">
+    <div class="col third center position-relative">
+      <img class="profile centerMargin gods-header-profile" src="{{actor.img}}" data-tooltip="{{actor.name}}">
+      {{#if showActorSwitcher}}
+      <a data-action="unselectActor" class="gods-header-close" data-tooltip="{{localize 'ChangeHero'}}"><i class="fas fa-times"></i></a>
+      {{/if}}
+    </div>
+    <div class="col seventy">
+      <div class="row-section">
+        <div class="col ninety">
+          <h3><a data-action="openChar">{{actor.name}}</a></h3>
+        </div>
+        <div class="col ten center flexrow">
+          <a data-action="resetSchips" class="gods-header-reset" data-tooltip="{{localize 'ResetSchipsTooltip'}}">
+            <i class="fa fa-recycle" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row-schips stackedSchips gods-schip-container">
+    {{#each fatePoints}}
+    <button type="button" data-action="schipUpdate" class="ownSchips noBorder dsadesignbutton schip {{this.cssClass}}" data-val="{{this.val}}" data-tooltip="Schicksalspunkt"></button>
+    {{/each}}
+    
+    {{#each specialPointsGroups}}
+      {{#each this.dots}}
+      <button type="button" data-action="specialSchipUpdate" class="ownSchips noBorder dsadesignbutton schip {{this.cssClass}}" data-key="{{../key}}" data-val="{{this.val}}" data-tooltip="{{../name}}-Schip" style="{{this.imgStyle}}"></button>
+      {{/each}}
+    {{/each}}
+  </div>
+
+  {{else}}
+  <div class="no-personae-list">
+    <div class="empty-state-small">
+      <i class="fas fa-hat-wizard"></i>
+      <h3>{{localize "SelectActor"}}</h3>
+      <p>{{localize "SelectActorHint"}}</p>
+    </div>
+    {{#if availableActors.length}}
+    <div class="row-section bags gap2px wrap flexAlignCenter">
+      {{#each availableActors as |a|}}
+      <div class="slot" data-action="quickSelectActor" data-actor-id="{{a.id}}" style="background-image:url('{{a.img}}')" data-tooltip="{{a.name}}">
+      </div>
+      {{/each}}
+    </div>
+    {{/if}}
+  </div>
+  {{/if}}
+  
+  <hr>
+
+  {{#unless isDetailView}}
+  <div class="general-rules-wrapper gods-rules-box">
+    <h2 class="gods-rules-title">{{localize "Rules.SpecialSchipsTitle"}}</h2>
+    <ul class="dsalist">
+        <li><p>{{{localize "Rules.SpecialSchips1"}}}</p></li>
+        <li><p>{{{localize "Rules.SpecialSchips2"}}}</p></li>
+        <li><p>{{{localize "Rules.SpecialSchips3"}}}</p></li>
+        <li><p>{{{localize "Rules.SpecialSchips4"}}}</p></li>
+    </ul>
+
+    <h2 class="gods-rules-subtitle">{{localize "Rules.DiceTitle"}}</h2>
+    <p class="gods-rules-hint">{{{localize "Rules.DiceHint"}}}</p>
+    <ul class="dsalist">
+        <li><p>{{{localize "Rules.Dice1"}}}</p></li>
+        <li><p>{{{localize "Rules.Dice2"}}}</p></li>
+        <li><p>{{{localize "Rules.Dice3"}}}</p></li>
+        <li><p>{{{localize "Rules.Dice4"}}}</p></li>
+        <li><p>{{{localize "Rules.Dice5"}}}</p></li>
+    </ul>
+  </div>
+  {{/unless}}
+
+</div>
