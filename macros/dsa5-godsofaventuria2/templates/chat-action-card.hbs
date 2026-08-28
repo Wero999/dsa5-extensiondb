@@ -1,0 +1,15 @@
+<h5 class="center"><b>{{localize 'CHATFATE.fatepointUsed'}}</b></h5>
+{{#if specialRollHtml}}
+    {{{specialRollHtml}}}
+{{/if}}
+<div class="flexrow chat-fate-container">
+    <div class="chat-fate-text"><b>{{actorName}}</b> {{actionText}}<br><i>{{actionLabel}}</i></div>
+    <div class="row-schips flexrow flexAlignCenter stackedSchips" data-tooltip="{{tooltip}}">
+        {{#each schips}}
+            <span class="schip tiny {{this.cssClass}}" {{#if this.iconStyle}}style="{{this.iconStyle}}"{{/if}}></span>
+        {{/each}}
+    </div>
+</div>
+{{#if rollDetails}}
+    {{{rollDetails}}}
+{{/if}}
