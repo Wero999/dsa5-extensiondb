@@ -1,0 +1,9 @@
+<p>{{{promptText}}}</p>
+<div class="form-group">
+    <label>{{localize "FateTab.SwapSchipPayWith"}}</label>
+    <select id="swap-schip-select" class="swap-schip-dropdown">
+        {{#each options}}
+            <option value="{{this.value}}">{{this.label}}</option>
+        {{/each}}
+    </select>
+</div>
