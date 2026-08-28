@@ -1,0 +1,17 @@
+<div class="dsa5">
+    <p>{{{descText}}}</p>
+    <ul class="item-list">
+        {{#each conditions}}
+        <li class="item flexrow flexAlignCenter">
+            <div class="image" style="background-image: url('{{this.img}}');"></div>
+            <div class="item-name">{{this.name}} <span class="hint">{{this.hintText}}</span></div>
+            <div class="item-controls center flexrow" data-tooltip="{{this.tooltipText}}">
+                <a class="decreaseEffect" data-id="{{this.id}}"><i class="fas fa-minus"></i></a>
+                &nbsp;<span class="cond-val" data-id="{{this.id}}">0</span>&nbsp;
+                <a class="increaseEffect" data-id="{{this.id}}" data-max="{{this.max}}"><i class="fas fa-plus"></i></a>
+            </div>
+        </li>
+        {{/each}}
+    </ul>
+    <p class="hint">{{localize "FateTab.DemonConditionMaxHint"}}</p>
+</div>
