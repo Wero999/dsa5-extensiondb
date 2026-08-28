@@ -1,0 +1,16 @@
+<div class="aves-coin-container">
+    <h4 class="aves-coin-title">
+        {{localize "FateTab.CoinTossTitle" name=actorName}}
+    </h4>   
+    <div class="aves-coin-img-wrapper">
+        <img src="{{avesImg}}" class="aves-coin-img {{#unless isSuccess}}aves-coin-img-fail{{/unless}}">
+    </div>
+    
+    <p class="aves-coin-result {{#if isSuccess}}aves-coin-text-success{{else}}aves-coin-text-fail{{/if}}">
+        <b>{{resultTitle}}</b>
+    </p>
+    
+    <p class="aves-coin-desc">
+        {{{resultDesc}}}
+    </p>
+</div>
