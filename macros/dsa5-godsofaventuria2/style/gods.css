@@ -1,0 +1,236 @@
+/* ==========================================
+   SCHIPAUSWAHL-GUI (BUTTONS & EFFEKTE)
+   ========================================== */
+
+button.schip-btn.special-schip {
+    background-image: none !important;
+    overflow: visible !important; 
+    width: 25px !important;
+    height: 28px !important;
+    min-width: 25px !important;
+    min-height: 28px !important;
+    padding: 0 !important;
+    border: none !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 4px !important;
+    transition: background-color 0.2s ease;
+}
+
+button.schip-btn.special-schip span.schip-icon {
+    width: 19px !important;
+    height: 19px !important;
+    margin: auto !important;
+    display: block !important;
+}
+
+button.schip-btn.special-schip:hover {
+    background-color: var(--dsadesign1) !important;
+}
+
+/* Leuchten (Götter -> Gold als Standard, nur nach außen) */
+button.schip-btn.special-schip.special-schip-relevant span.schip-icon {
+    box-shadow: 0 0 12px 5px rgba(255, 215, 0, 0.8) !important;
+    border-radius: 50% !important;
+    display: block !important;
+}
+
+/* Leuchten (Erzdämonen -> Rot überschreibt Gold, kompakt mit :is() gebündelt) */
+button.schip-btn.special-schip.special-schip-relevant:is(
+    [data-key="Blakharaz"], [data-key="Belhalhar"], [data-key="Charyptoroth"], 
+    [data-key="Targunitoth"], [data-key="Mishkara"], [data-key="Agrimoth"], 
+    [data-key="Belshirash"], [data-key="Asfaloth"], [data-key="Tasfarelel"], 
+    [data-key="Tasfarel"], [data-key="Belzhorash"], [data-key="Amazeroth"], 
+    [data-key="Belkelel"]
+) span.schip-icon {
+    box-shadow: 0 0 12px 5px rgba(255, 0, 0, 0.8) !important;
+}
+
+/* Nicht relevant -> Kein Leuchten auf dem Icon selbst */
+button.schip-btn.special-schip:not(.special-schip-relevant) span.schip-icon {
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Relevant & Angewählt -> Auswahlbox */
+button.schip-btn.special-schip.special-schip-relevant.schip-selected {
+    background-color: var(--dsadesign1) !important; 
+    background-image: url("/systems/dsa5/icons/backgrounds/macrobg.webp") !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    border: none !important;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.5) !important;
+}
+
+/* Nicht-relevant & Angewählt -> Native graue Box */
+button.schip-btn.special-schip:not(.special-schip-relevant).schip-selected {
+    background-color: var(--oddColor) !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.5) !important;
+}
+
+
+/* ==========================================
+   UNIFIED FATE DIALOG (ALLGEMEINES GUI)
+   ========================================== */
+
+.uf-header { margin-bottom: 15px; width: 100%; }
+.uf-title { margin-bottom: 12px; font-weight: bold; font-size: 1.1rem; }
+.uf-pool-container { justify-content: center; align-items: flex-start; width: 100%; }
+
+.uf-pool-selector { padding: 5px 15px; flex: 1; align-items: center; transition: all 0.2s; background-color: transparent; }
+.uf-pool-border { border-right: 1px solid var(--color-border-dark); }
+.uf-pool-active { background-color: var(--oddColor); border-radius: 8px; }
+
+.uf-pool-img { width: 45px; height: 45px; border-radius: 50%; margin-bottom: 5px; border: 1px solid var(--color-border-dark); cursor: pointer; }
+.uf-pool-img-default { cursor: default; }
+
+/* Bündelung zentrierter Reihen */
+.uf-schip-row, .uf-dice-row { justify-content: center; }
+.uf-dice-row-mt { justify-content: center; margin-top: 15px; }
+
+.uf-special-icon { border-radius: 50%; background-size: contain; background-repeat: no-repeat; background-position: center; }
+.uf-master-btn { background-size: 80%; background-position: center; background-repeat: no-repeat; }
+
+.uf-pool-desc { font-size: 0.95em; margin-top: 12px; font-style: italic; color: var(--color-text-dark-secondary); }
+.uf-special-nav { border-top: none; margin-top: 0; padding-top: 0; margin-bottom: 10px; }
+
+.uf-tab-desc-box { margin-top: 10px; margin-bottom: 15px; }
+.uf-tab-desc-box-mt { margin-top: 15px; }
+
+/* Bündelung von Text-Eigenschaften */
+.uf-tab-desc-text, .uf-tab-desc-text-sub { font-size: 0.9em; font-style: italic; margin: 0; }
+.uf-tab-desc-text-sub { color: var(--color-text-dark-secondary); }
+
+
+/* ==========================================
+   GÖTTER & DÄMONEN - AUSWAHLMENÜ
+   ========================================== */
+
+/* Native DSA5 Überlappung & Tabs */
+.godsMenu .window-content { display: block !important; overflow-y: auto !important; }
+.godsMenu .tab.active { display: block !important; height: auto !important; overflow-y: visible !important; }
+.godsMenu nav.tabs, .godsMenu .tabs { overflow: hidden !important; }
+.godsMenu .item-list, .godsMenu .scrollable { height: auto !important; max-height: none !important; overflow: visible !important; }
+
+.godsMenu .item-list .item { background: rgba(0, 0, 0, 0.02) !important; border: 1px solid rgba(0, 0, 0, 0.05); border-radius: 4px; transition: background 0.2s ease; }
+.godsMenu .item-list .item:hover { background: rgba(0, 0, 0, 0.08) !important; }
+
+.godsMenu .stackedSchips { display: flex; align-items: center; justify-content: center; }
+.godsMenu .stackedSchips > button { position: relative; transition: transform 0.2s ease; }
+.godsMenu .stackedSchips > button:hover { transform: scale(1.2); z-index: 10; }
+.godsMenu .stackedSchips > button:not(:first-child) { margin-left: -12px !important; }
+
+.godsMenu .stackedSchips .gods-schip { background-size: 85% !important; background-position: center 32% !important; background-repeat: no-repeat !important; }
+
+/* Kopfbereich & Titel */
+.god-header-row, .demon-header-row { margin-bottom: 10px; }
+.god-title-row, .demon-title-row { margin-bottom: 15px; min-height: 60px; }
+.god-icon-col, .demon-icon-col { display: flex; align-items: center; justify-content: center; height: 60px; }
+.god-icon-img, .demon-icon-img { width: 40px; height: 40px; object-fit: contain; border: none; background: transparent; display: block; border-radius: 50%; box-shadow: 0 0 3px rgba(0,0,0,0.8); }
+.god-name-text, .demon-name-text { padding-left: 10px; font-weight: bold; font-size: 1.2rem; }
+
+/* ==========================================
+   REGELBOXEN & INFO-TEXTE
+   ========================================== */
+.god-info-box, .demon-info-box, .gods-rules-box { padding: 10px; margin-bottom: 15px; background: rgba(0, 0, 0, 0.05); border: 1px solid rgba(0,0,0,0.2); border-radius: 5px; }
+.god-info-box h2, .demon-info-box h2, .gods-rules-title { margin-top: 0; }
+.god-info-box p, .demon-info-box p { margin: 0; }
+.god-info-box .dsalist, .demon-info-box .dsalist, .cheat-rules-list { margin-bottom: 0; }
+.gods-rules-subtitle { margin-top: 15px; }
+.gods-rules-hint, .cheat-rules-hint { font-style: italic; margin-bottom: 8px; }
+
+/* Schip Swap Bereich */
+.god-swap-container, .demon-swap-container { justify-content: center; margin-top: 30px; gap: 15px; }
+.god-swap-item, .demon-swap-item { flex: 0 0 50px; height: 50px; justify-content: center; }
+.god-schip-img, .demon-schip-img { width: 45px; height: 45px; object-fit: contain; border: none; background: transparent; display: block; filter: drop-shadow(0 0 2px rgba(0,0,0,0.5)); }
+.god-swap-center, .demon-swap-center { flex: 0 0 auto; }
+.god-swap-icon-wrapper, .demon-swap-icon-wrapper { margin-bottom: 5px; font-size: 1.4rem; }
+.god-target-img, .demon-target-img { width: 38px; height: 38px; object-fit: contain; border: none; background: transparent; display: block; border-radius: 50%; box-shadow: 0 0 3px rgba(0,0,0,0.8); }
+
+/* Raster-Ansicht (Grid) für die Übersicht */
+.god-grid-list, .demon-grid-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px 10px; margin: 0; padding: 0; list-style: none; }
+.god-grid-item, .demon-grid-item { cursor: pointer; margin: 0; display: flex; align-items: center; padding: 4px; border-radius: 3px; transition: background 0.2s ease; }
+.god-grid-item:hover, .demon-grid-item:hover { background: rgba(0, 0, 0, 0.05); }
+.god-grid-image, .demon-grid-image { flex: 0 0 30px; height: 30px; background-size: contain; background-repeat: no-repeat; background-position: center; }
+.god-grid-name, .demon-grid-name { flex: 1 1 auto; padding-left: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Navigation & Tabs & Header */
+.gods-nav-tab { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.gods-nav-icon { width: 24px; height: 24px; border: none; background: transparent; object-fit: contain; display: block; margin: 0; }
+.gods-nav-label { margin: 0; padding: 0; line-height: 24px; cursor: pointer; }
+.gods-header-profile { width: 70px; height: 70px; }
+.gods-header-close { position: absolute; top: 0; right: 0; }
+.gods-header-reset { font-size: 1.1rem; cursor: pointer; }
+.gods-schip-container { margin-top: 15px; margin-bottom: 5px; }
+
+
+/* ==========================================
+   SL WILLKÜR DIALOGE
+   ========================================== */
+
+/* Cheat Regel-Box (kleinere Abweichung zur generischen Box) */
+.cheat-rules-box { padding: 10px; margin: 10px 0; background: rgba(0, 0, 0, 0.05); border: 1px solid rgba(0,0,0,0.2); border-radius: 5px; font-size: 0.9em; }
+
+/* Zusammenfassung der Container für Spezialwurf und Reroll */
+.cheat-dice-container, .cheat-reroll-container { justify-content: center; gap: 20px; padding: 15px 0; }
+
+.cheat-dice-col { align-items: center; }
+.cheat-dice-icon { width: 40px; height: 40px; border: none; background: transparent; object-fit: contain; filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.5)); margin-bottom: 8px; }
+.cheat-dice-input { width: 50px; text-align: center; font-size: 1.2rem; font-weight: bold; }
+
+.cheat-reroll-col { align-items: center; gap: 5px; }
+.cheat-reroll-btn { cursor: default; pointer-events: none; }
+.cheat-reroll-span { margin: 0; }
+.cheat-reroll-input { width: 45px; text-align: center; }
+
+
+/* ==========================================
+   KLEINE DIALOGE & BEREICHE
+   ========================================== */
+
+/* Meister Menü */
+.master-schip-bg { background-size: 80%; background-position: center; background-repeat: no-repeat; }
+.master-hidden-btn { visibility: hidden; }
+.master-skill-select { width: 90%; }
+.master-folder-input { border: none; margin: 0; padding: 0; }
+
+/* Chat-Nachricht (Schicksalspunkt) */
+.chat-fate-container { align-items: center; margin-bottom: 5px; }
+.chat-fate-text { flex: 1; }
+
+/* Manueller Zustandsabbau */
+.cond-val { font-weight: bold; }
+
+/* Schipaustausch Dropdown */
+.swap-schip-dropdown { width: 100%; margin-top: 5px; }
+
+
+/* ==========================================
+   CHAT-KARTEN (WÜRFE & EFFEKTE)
+   ========================================== */
+
+/* Spezialwurf (Götter/Dämonen) */
+.special-roll-box { border: 1px solid var(--color-border-dark); padding: 5px; margin-bottom: 10px; border-radius: 3px; background: rgba(0,0,0,0.02); text-align: center; }
+.special-roll-title { font-size: 0.9em; margin-bottom: 8px; border-bottom: 1px solid rgba(0,0,0,0.1); }
+.special-roll-dice-container { display: flex; justify-content: center; gap: 12px; margin-bottom: 8px; align-items: center; min-height: 35px; }
+.special-roll-img { width: 35px; height: 35px; object-fit: contain; border: none !important; background: transparent !important; vertical-align: middle; margin: 0; box-shadow: none !important; filter: none !important; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
+.special-roll-span { vertical-align: middle; margin: 0; }
+.special-roll-result { margin-top: 5px; }
+
+/* Aves Münzwurf */
+.aves-coin-container { border: 1px dashed var(--color-border-dark); padding: 5px; margin-bottom: 5px; text-align: center; background: rgba(0,0,0,0.02); border-radius: 4px; }
+.aves-coin-title { margin-bottom: 5px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 3px; }
+.aves-coin-img-wrapper { margin-bottom: 5px; display: flex; justify-content: center; align-items: center; }
+.aves-coin-img { width: 45px; height: 45px; border: none !important; background: transparent !important; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.4)); }
+.aves-coin-img-fail { filter: drop-shadow(0 2px 3px rgba(0,0,0,0.4)) grayscale(100%) opacity(0.5); }
+.aves-coin-result { margin: 0; }
+.aves-coin-text-success { color: darkgreen; }
+.aves-coin-text-fail { color: darkred; }
+.aves-coin-desc { margin: 0; font-size: 0.9em; }
