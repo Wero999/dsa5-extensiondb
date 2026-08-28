@@ -1,0 +1,75 @@
+<div class="tab scrollable {{tabs.archdemons.cssClass}}" data-tab="archdemons" data-group="sheet">
+    {{#if selectedDemon}}
+        <div class="row-section demon-header-row">
+            <div class="col">
+                <button type="button" data-action="closeDetail" class="dsadesignbutton">
+                    <i class="fas fa-arrow-left"></i> {{localize "BackToList"}}
+                </button>
+            </div>
+        </div>
+        
+        <div class="row-section flexAlignCenter table-title demon-title-row">
+            <div class="col zerofive center demon-icon-col">
+                <img src="{{selectedDemon.icon}}" class="demon-icon-img">
+            </div>
+            <div class="col ninety withContext">
+                <span class="demon-name-text">{{selectedDemon.name}}</span>
+            </div>
+        </div>
+
+        <div class="row-section">
+            <div class="col general-rules-wrapper demon-info-box">
+                <p>{{{selectedDemon.description}}}</p>
+            </div>
+        </div>
+        
+        <div class="row-section flexAlignCenter flexrow demon-swap-container">
+            <div class="center flexcol flexAlignCenter demon-swap-item">
+                <img src="systems/dsa5/icons/schip.webp" class="demon-schip-img">
+            </div>
+            
+            <div class="center flexcol flexAlignCenter demon-swap-center">
+                <div class="demon-swap-icon-wrapper">
+                    <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                </div>
+                <button type="button" data-action="swapEffect" class="dsadesignbutton">
+                    {{localize "Swap"}}
+                </button>
+            </div>
+            
+            <div class="center flexcol flexAlignCenter demon-swap-item">
+                <img src="{{selectedDemon.icon}}" class="demon-target-img">
+            </div>
+        </div>
+    {{else}}
+
+        <div class="row-section">
+            <div class="col general-rules-wrapper demon-info-box">
+                <h2>{{localize "Rules.DemonsInitTitle"}}</h2>
+                <ul class="dsalist">
+                    <li><p>{{{localize "Rules.DemonsInit1"}}}</p></li>
+                    <li><p>{{{localize "Rules.DemonsInit2"}}}</p></li>
+                    <li><p>{{{localize "Rules.DemonsInit3"}}}</p></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="row-section">
+            <div class="col">
+                <ul class="item-list demon-grid-list">
+                    {{#each demons as |demon|}}
+                    <li class="actor-spell-item item skills lineheight demon-grid-item" 
+                        data-action="openDetail" data-id="{{demon.id}}" data-name="{{demon.name}}" data-icon="{{demon.icon}}" data-type="{{demon.type}}" data-description="{{demon.description}}">
+                        
+                        <div class="image demon-grid-image" style="background-image: url('{{demon.icon}}');"></div>
+                        
+                        <div class="actor-spell-name withContext demon-grid-name">
+                            <a>{{demon.name}}</a>
+                        </div>
+                    </li>
+                    {{/each}}
+                </ul>
+            </div>
+        </div>
+    {{/if}}
+</div>
