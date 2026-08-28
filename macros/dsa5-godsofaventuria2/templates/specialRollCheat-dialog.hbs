@@ -1,0 +1,25 @@
+<div class="dsa5 standard-form">
+    <h4 class='center'>{{{title}}}</h4>
+    
+    <div class="general-rules-wrapper cheat-rules-box">
+        <p class="cheat-rules-hint">{{{localize "Rules.DiceHint"}}}</p>
+        <ul class="dsalist cheat-rules-list">
+            <li><p>{{{localize "Rules.Dice1"}}}</p></li>
+            <li><p>{{{localize "Rules.Dice2"}}}</p></li>
+            <li><p>{{{localize "Rules.Dice3"}}}</p></li>
+            <li><p>{{{localize "Rules.Dice4"}}}</p></li>
+            <li><p>{{{localize "Rules.Dice5"}}}</p></li>
+        </ul>
+    </div>
+
+    <div class='card-content hide-option roll-result center flexrow flexAlignCenter cheat-dice-container'>
+        <div class="flexcol center cheat-dice-col">
+            <img src="{{icon1}}" data-tooltip="{{tooltip1}}" class="cheat-dice-icon">
+            <input type="number" id="special-cheat-d1" value="6" min="1" max="6" class="cheat-dice-input">
+        </div>
+        <div class="flexcol center cheat-dice-col">
+            <img src="{{icon2}}" data-tooltip="{{tooltip2}}" class="cheat-dice-icon">
+            <input type="number" id="special-cheat-d2" value="6" min="1" max="6" class="cheat-dice-input">
+        </div>
+    </div>
+</div>
