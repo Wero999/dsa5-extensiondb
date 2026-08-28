@@ -1,0 +1,12 @@
+<div class="dsa5 standard-form">
+    <div class='card-content hide-option roll-result center flexrow flexAlignCenter cheat-reroll-container'>
+        {{#each dice as |die|}}
+        <div class="flexcol center cheat-reroll-col">
+            <a class="dieButton cheat-reroll-btn">
+                <span data-tooltip="{{die.tooltip}}" class="{{die.cssClass}} die-{{die.attr}} d{{die.faces}} cheat-reroll-span">{{die.original}}</span>
+            </a>
+            <input type="number" class="cheat-value dieInput quantity-click cheat-reroll-input" data-index="{{die.rollIndex}}" value="{{die.original}}" min="1" max="{{die.faces}}">
+        </div>
+        {{/each}}
+    </div>
+</div>
