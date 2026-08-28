@@ -1,0 +1,120 @@
+<div class="tab scrollable {{tabs.main.cssClass}}" data-tab="main" data-group="{{tabs.main.group}}">
+    <div class="row-section">
+        <div class="col third lineheight center" data-tooltip="groupFatePoints">
+            <b>{{{localize 'CHARAbbrev.groupFatePoints'}}}</b>
+        </div>
+        <div class="col sixty center" data-tooltip="fatePoints">
+            {{#each groupschips as |item i|}}
+            <a class="schip groupschip {{item.cssClass}}" data-action="groupschip" data-val="{{item.value}}"></a>
+            {{/each}}
+        </div>
+        <div class="col zerofive flexrow">
+            <button type="button" class="icon fas fa-minus dsadesignbutton noBorder" data-action="addGroupSchip" data-value="-1"></button>
+        </div>
+        <div class="col zerofive flexrow">
+            <button type="button" class="icon fas fa-plus dsadesignbutton noBorder" data-action="addGroupSchip" data-value="1"></button>
+        </div>
+        <div class="col zerofive flexrow">
+            <button type="button" class="icon fas fa-users dsadesignbutton noBorder" data-action="openPartySheet" data-tooltip="GROUP.members"></button>
+        </div>
+    </div>
+    
+    <div class="row-section">
+        <div class="col third lineheight center" data-tooltip="{{localize 'masterFatePoints'}}">
+            <b>{{{localize 'masterFatePoints'}}}</b>
+        </div>
+        
+        <div class="col sixty center" data-tooltip="{{localize 'masterFatePoints'}}">
+            {{#each masterschips as |item i|}}
+            <a class="schip groupschip master-schip-bg {{item.cssClass}}" style="background-image: url('{{item.img}}');" data-action="masterschip" data-val="{{item.value}}"></a>
+            {{/each}}
+        </div>
+        
+        <div class="col zerofive flexrow">
+            <button type="button" class="icon fas fa-minus dsadesignbutton noBorder" data-action="addMasterSchip" data-value="-1"></button>
+        </div>
+        <div class="col zerofive flexrow">
+            <button type="button" class="icon fas fa-plus dsadesignbutton noBorder" data-action="addMasterSchip" data-value="1"></button>
+        </div>
+        <div class="col zerofive flexrow">
+            <button type="button" class="icon fas fa-users dsadesignbutton noBorder master-hidden-btn"></button>
+        </div>
+    </div>
+    
+    <div class="row-section">
+        <div class="col third lineheight center">
+            <b>{{localize "TYPES.Item.skill"}}</b>
+        </div>
+        <div class="col sixty">
+            <select name="data.skill" class="skillSelektor select2 master-skill-select">
+                {{selectOptions abilities selected=lastSkill valueAttr="key" labelAttr="name" sort=true}}
+            </select>
+        </div>    
+        <div class="col ten lineheight flexrow">
+            <button type="button" class="icon fas fa-dice-two dsadesignbutton noBorder" data-action="requestRoll" data-tooltip="HELP.request"></button>
+        </div>
+    </div>
+    
+    <div class="row-section skills table-title">
+        <div class="col ten">
+            <button type="button" class="icon fas fa-grip-vertical dsadesignbutton noBorder dragEveryone" data-tooltip="MASTER.dragEveryone"></button>
+        </div>
+        <div class="col fourty flexrow">
+            {{localize 'Name'}} <button type="button" class="icon fas fa-shuffle dsadesignbutton noBorder" data-action="randomPlayer" data-tooltip="MASTER.randomPlayer"></button>
+        </div>
+        <div class="col third">
+        </div>
+        <div class="col ten flexrow">
+            <input type="checkbox" class="selectAll" name="selectAll" value="1">
+        </div>
+        <div class="col zerofive flexAlignEnd flexrow">
+            <button type="button" class="icon fas fa-folder dsadesignbutton noBorder" data-action="addFolder" data-mode="create" data-tooltip="SIDEBAR.ACTIONS.CREATE.Folder"></button>
+        </div>
+        <div class="col zerofive flexAlignEnd flexrow">
+            <button type="button" class="icon fas fa-ellipsis-vertical dsadesignbutton noBorder" data-action="headerActions" data-tooltip="JOURNAL.ActionShow"></button>
+        </div>
+    </div>
+    
+    <div class="heros">
+        {{#if hasHeros}}
+            {{> systems/dsa5/templates/system/mastermenu/master_heros.hbs heros=heros}}
+            {{#each folders as |folder|}}
+            <div class="row-section skills lineheight table-title isFolder" data-id="{{folder.id}}">
+                
+                <div class="col ten">
+                    <a class="dragEveryone" data-folder="{{folder.id}}" data-tooltip="MASTER.dragEveryone"><i class="fas fa-grip-vertical"></i></a>
+                </div>
+                <div class="row-section col">
+                    
+                    <div class="col two">
+                        <input type="text" data-id="{{folder.id}}" class="editFolder master-folder-input" value="{{folder.name}}"/>
+                    </div>
+                    <div class="col third">
+                    </div>
+                    <div class="col ten flexrow">
+                        <input type="checkbox" data-folder="{{folder.id}}" class="selectAll" name="selectAll" value="1">
+                    </div>
+                    <div class="col ten flexrow flexAlignEnd">
+                        <button type="button" class="icon fas fa-trash dsadesignbutton noBorder" data-action="addFolder" data-id="{{folder.id}}" data-mode="delete" data-tooltip="FOLDER.Remove"></button>
+                    </div>
+                </div>
+            </div>
+            <div class="row-section col isFolder" data-id="{{folder.id}}">
+                <div class="col ten"></div>
+                <div class="col">                            
+                    {{> systems/dsa5/templates/system/mastermenu/master_heros.hbs heros=folder.contents}}                                              
+                </div>                        
+            </div>                    
+            {{/each}}
+            
+        {{else}}
+        <div class="row-section">
+            <div class="col ten"></div>
+            <div class="col eighty center">
+                <p>{{localize "MASTER.noHeros"}}</p>
+            </div>
+            <div class="col ten"></div>
+        </div>
+        {{/if}}
+    </div>
+</div>
