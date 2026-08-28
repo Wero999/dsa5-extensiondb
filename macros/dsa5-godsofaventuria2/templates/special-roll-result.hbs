@@ -1,0 +1,25 @@
+<div class="special-roll-box">
+    
+    <div class="special-roll-title">
+        <b>{{localize "FateTab.SpecialRollTitle"}}</b>
+    </div>
+    
+    <div class="special-roll-dice-container">
+        {{#if die1Img}}
+            <img src="{{die1Img}}" data-tooltip="{{die1Tooltip}}" class="special-roll-img">
+        {{else}}
+            <span class="die-effect d6 special-roll-span">{{d1Val}}</span>
+        {{/if}}
+        
+        {{#if die2Img}}
+            <img src="{{die2Img}}" data-tooltip="{{die2Tooltip}}" class="special-roll-img">
+        {{else}}
+            <span class="die-effect d6 special-roll-span">{{d2Val}}</span>
+        {{/if}}
+    </div>
+    
+    <div class="special-roll-result" style="color: {{resultColor}};">
+        <b>{{resultTitle}}</b> {{{resultDesc}}}
+    </div>
+
+</div>
