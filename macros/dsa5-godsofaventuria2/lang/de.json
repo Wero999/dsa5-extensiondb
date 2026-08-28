@@ -1,0 +1,401 @@
+{
+  "BackToList": "Zurück zur Liste",
+  "ChangeHero": "Held wechseln",
+  "masterFatePoints": "Meister-Schips",
+  "ResetSchipsTooltip": "Schicksalspunkte und Spezialschips zurücksetzen",
+  "SelectActor": "Akteur auswählen",
+  "SelectActorHint": "Ziehe einen Akteur hierhin oder wähle einen unten aus.",
+  "Swap": "Austauschen",
+  "TabDemons": "Erzdämonen",
+  "TabGods": "Götter",
+  "Title": "Schicksal und Verdammnis",
+  "Tradition (Nameless One)": "Tradition (Namenloser Kult)",
+  "UseFatePoint": "Schicksalspunkt verwenden",
+
+  "DämonenpaktiererError": "{name} ist ein Dämonenpaktierer und kann keine Götter-Schips erhalten.",
+  "ErrorNoActorSelected": "Es wurde kein Held ausgewählt, für den der Schip ausgetauscht werden kann.",
+  "ErrorNoDieSelected": "Wähle mindestens einen Würfel!",
+  "ErrorNoFatePoints": "Dieser Akteur hat keine Schicksalspunkte mehr übrig, die er austauschen könnte!",
+  "ErrorNoGroupSchips": "Keine Gruppenschips übrig!",
+  "ErrorNoPersonalSchips": "Keine persönlichen Schicksalspunkte übrig!",
+  "ErrorNoSpecialSchipSelected": "Bitte wähle den zu nutzenden Spezialschip händisch aus!",
+  "ErrorSchipEmpty": "Dieser Schip ist bereits verbraucht!",
+  "ErrorSingleDieSelected": "Wähle einen Würfel!",
+  "ErrorSpecialSchipEmpty": "Keine Spezial-Schips dieses Typs übrig!",
+  "NamenloserKultistError": "{name} folgt dem Namenlosen Kult und kann keine regulären Götter-Schips erhalten.",
+
+  "DemonSymbol": "Erzdämonen-Symbol (6)",
+  "GodSymbol": "Götter-Symbol (6)",
+  "KhaSymbol": "Kha-Symbol (6)",
+  "StarWallSymbol": "Sternenwall-Symbol (6)",
+
+  "CHATFATE": {
+    "rerollDamageDesc": "Nutze einen Schicksalspunkt, um den ausgewürfelten Schaden zu wiederholen. Das zweite Ergebnis ist bindend.",
+    "usesPointFor": "nutzt einen Schicksalspunkt für:"
+  },
+
+  "FateAbility": {
+    "AttackImprove": "Attacke verbessern",
+    "AttributeImprove": "Eigenschaft verbessern",
+    "DodgeImprove": "Ausweichen verbessern",
+    "ParryImprove": "Parade verbessern",
+    "RangeImprove": "Fernkampf verbessern"
+  },
+
+  "FateTab": {
+    "ActionCancelled": "Vorgang abgebrochen.",
+    "ActorTooltip": "Schicksalspunkte",
+    "AddQS": "Qualitätsstufe erhöhen",
+    "AddQSDesc": "Nutze einen Schicksalspunkt, um der Qualitätsstufe einer erfolgreichen Probe +1 (QS) hinzuzufügen.",
+	"AddQSDescSpecial": "Dieser Schip erhöht die Qualität bei dieser Probe automatisch um 2 QS (maximal bis QS 6).",
+	"AddQSChatDetail": "<p>Qualitätsstufe um <b>+{qs}</b> erhöht.</p>",
+    "Apply": "Anwenden",
+    "AvesCheatFailure": "Effekt bleibt aus",
+    "AvesCheatSuccess": "Effekt tritt ein",
+    "AvesCheatPrompt": "Welches Ergebnis soll durch die SL-Willkür erzwungen werden?",
+    "AvesCheatTitle": "Aves Münzwurf Probe",
+    "AvesHeadDesc": "Der Effekt des Schips wird verdoppelt bzw. eine zweite Wiederholung gewährt!",
+    "AvesHeadTitle": "Aves' Gunst:",
+    "AvesTailDesc": "Keine Effektverdopplung.",
+    "AvesTailTitle": "Aves' Laune:",
+    "CoinTossTitle": "{name} - Münzwurf",
+    "ConditionCurrentLevel": "(Aktuell: Stufe {val})",
+    "ConditionRemovedFull": "Der Zustand '{name}' wurde vollständig entfernt.",
+    "ConditionRemovedPartial": "Der Zustand '{name}' wurde um {amount} Stufe(n) gesenkt.",
+    "ConditionTooltip": "Der Held hat aktuell {val} Stufen {name}",
+	"CritAttack": "kritischen",
+    "DemonConditionDesc": "<b>{name}</b> kann durch erzdämonischen Einfluss bis zu <b>3 Zustandsstufen</b> abbauen.",
+    "DemonConditionMaxHint": "Achtung: Du kannst insgesamt maximal 3 Stufen abbauen.",
+    "DemonConditionMaxWarn": "Du kannst insgesamt maximal 3 Stufen abbauen!",
+    "DemonConditionRemoveBtn": "Zustände entfernen",
+    "DemonConditionTitle": "Erzdämonischer Effekt: Zustände abbauen",
+    "DemonDie": "Erzdämonenwürfel",
+    "ErrorMaxOneDie": "Du darfst für den normalen Schicksalspunkt maximal 1 Würfel auswählen.",
+    "ExtraDamage": "<p><b>Zusatzschaden</b>: +{damage} TP</p>",
+    "FatePoint": "Schicksalspunkt",
+    "GodDie": "Götterwürfel",
+    "GroupFatePoint": "Gruppenschicksalspunkt",
+    "GroupTooltip": "Gruppenschicksalspunkte",
+    "Improve": "Ergebnis verbessern",
+    "ImproveDesc": "Um das Würfelergebnis einer Probe um bis zu 2 zu verbessern, kann 1 Schip nach dem Wurf eingesetzt werden.",
+    "ImproveSubtitle": "Wähle den zu verbessernden Würfel",
+    "KhaDie": "Khawürfel",
+    "MasterDarkness": "Beistand der Finsternis",
+	"MasterDarknessDesc": "Bei dieser Meisterschip-Option kann der Meister für den Einsatz von 1 Meisterschip bestimmen, dass eine Heldin einen oder mehrere W6 zur Bestimmung der TP neu würfeln muss. Das zweite Ergebnis ist bindend. Das Wesen, welches von der Option profitiert, muss die Heldin wahrnehmen können und die Handlung muss direkt gegen das Wesen gerichtet sein (indirekte Schadensquellen zählen also nicht).",
+    "MasterFailedAttack": "Gescheiterter Angriff",
+    "MasterFailedCost": "Gescheitert (-{cost})",
+	"MasterFailedCostDetail": "Es handelt sich um einen {type} Angriff. Der Einsatz dieser Funktion kostet {cost} Meisterschip(s).",
+    "MasterFailedDesc": "<p>Der Wurf wurde durch den Einsatz von {cost} Meister-Schip(s) zum Scheitern gezwungen!</p>",
+	"MasterFailedDescFull": "Die Attacke oder der Fernkampfangriff eines Helden wird als misslungen bewertet, obwohl sein Würfelwurf gelungen ist. Dies gilt auch für eine gewürfelte 1. Die Option kann auch nach der Bestimmung der TP gewählt werden.",
+    "MasterFate": "Meisterschicksal",
+	"MasterFateDesc": "Wer einen, zwei oder alle Würfel bei einer Eigenschafts- oder Fertigkeitsprobe oder bei einer Probe auf Attacke, Verteidigung und Fernkampf wiederholen will, darf 1 Meisterschip zum nochmaligen Würfeln investieren.",
+    "MasterNastyDamage": "Fieser Schaden",
+	"MasterNastyDamageDesc": "Wird diese Option gewählt, erhöht sich der Schaden eines Wesens um 1W6 TP. Diese Meisterschip-Option darf nur eingesetzt werden, wenn ein Gegner einer Heldin trifft und TP verursachen würde. Die Option muss vor der Bestimmung der TP angekündigt werden, also nach einer erfolgreichen und nicht verteidigten Attacke. Bei einem Kritischen Treffer kommt dieser zusätzliche Schaden erst nach der Verdopplung der TP hinzu.",
+    "MasterNoOption": "Keine Option",
+	"MasterPlaceholderDesc": "Es sind keine weiteren Meisterschip-optionen verfügbar.",
+    "MasterSchip": "Meister-Schip",
+    "NewRoll": "<p><b>Neuer Wurf</b>: {roll}</p>",
+    "NoConditionsToReduce": "{name} hat keine aktiven Zustände, die reduziert werden könnten.",
+    "OptionalSelectDie": "Wähle den zu wiederholenden Würfel (optional)",
+    "PhexRefundDesc": "Das Göttersymbol wurde gewürfelt! Der Phexschip wird sofort erstattet , ohne dass ein Austausch nötig ist!",
+    "PhexRefundTitle": "Phexens Gunst:",
+	"RegularAttack": "regulären",
+    "Reroll": "Wurf wiederholen",
+    "RerollDamage": "Schadenswurf wiederholen",
+    "SelectSchipType": "Wähle den zu nutzenden Typ von Schip aus.",
+    "SpecialRollBlockedDesc": "Einsatz fehlgeschlagen. Schip bleibt erhalten, aber Aktion ist gesperrt.",
+    "SpecialRollBlockedTitle": "Blockiert!",
+    "SpecialRollFlexibleDesc": "Effekt tritt ein, Kosten wurden getauscht.",
+    "SpecialRollFlexibleTitle": "Flexibel!",
+    "SpecialRollNormalDesc": "Effekt tritt ein, Schip wird verbraucht.",
+    "SpecialRollNormalTitle": "Normal:",
+    "SpecialRollSuccessDesc": "Effekt tritt ein, Schip wird zurückerstattet.",
+    "SpecialRollSuccessTitle": "Erfolg!",
+	"SpecialRollTitle": "Spezialwürfel-Wurf (2W6)",
+    "SpecialSchipAction": "Spezialschip-Effekt",
+    "SpecialSchipHint": "Abhängig von der Probe besitzen manche Spezialschips einen zusätzlichen Effekt",
+    "SpecialTooltip": "Götter- und Erzdämonenschips",
+    "StarwallDie": "Sternenwallwürfel",
+    "SwapSchipConfirm": "Bestätigen",
+    "SwapSchipGroup": "Gruppenschip ({amount} verfügbar)",
+    "SwapSchipKeep": "Original ({name}-Schip) verwenden",
+    "SwapSchipPayWith": "Bezahle stattdessen mit:",
+    "SwapSchipPersonal": "Persönlicher Schip ({amount} verfügbar)",
+    "SwapSchipPrompt": "Das <b>{symbol}</b> ist gefallen! Du darfst die Kosten für diesen Effekt durch einen beliebigen anderen Schip ersetzen. Der Effekt tritt trotzdem wie gewünscht ein.",
+    "SwapSchipSpecial": "{name}-Schip ({amount} verfügbar)",
+    "SwapSchipTitle": "Schip-Kosten tauschen",
+    "UseSchip": "Schip verwenden"
+  },
+
+  "Talent": {
+    "BekehrenUndUeberzeugen": "Bekehren & Überzeugen",
+    "Betoeren": "Betören",
+    "BooteUndSchiffe": "Boote & Schiffe",
+    "Einschuechtern": "Einschüchtern",
+    "Etikette": "Etikette",
+    "Faehrtensuchen": "Fährtensuchen",
+    "Fesseln": "Fesseln",
+    "FischenUndAngeln": "Fischen & Angeln",
+    "Fliegen": "Fliegen",
+    "Geschichtswissen": "Geschichtswissen",
+    "GoetterUndKulte": "Götter & Kulte",
+    "Handel": "Handel",
+    "HeilkundeGift": "Heilkunde Gift",
+    "HeilkundeKrankheiten": "Heilkunde Krankheiten",
+    "HeilkundeSeele": "Heilkunde Seele",
+    "HeilkundeWunden": "Heilkunde Wunden",
+    "Holzbearbeitung": "Holzbearbeitung",
+    "Klettern": "Klettern",
+    "Koerperbeherrschung": "Körperbeherrschung",
+    "Kraftakt": "Kraftakt",
+    "Lebensmittelbearbeitung": "Lebensmittelbearbeitung",
+    "Lederbearbeitung": "Lederbearbeitung",
+    "Magiekunde": "Magiekunde",
+    "Mechanik": "Mechanik",
+    "Menschenkenntnis": "Menschenkenntnis",
+    "Metallbearbeitung": "Metallbearbeitung",
+    "Orientierung": "Orientierung",
+    "Pflanzenkunde": "Pflanzenkunde",
+    "Rechtskunde": "Rechtskunde",
+    "Reiten": "Reiten",
+    "SagenUndLegenden": "Sagen & Legenden",
+    "Schwimmen": "Schwimmen",
+    "Selbstbeherrschung": "Selbstbeherrschung",
+    "Sinnesschaerfe": "Sinnesschärfe",
+    "Sphaerenkunde": "Sphärenkunde",
+    "Steinbearbeitung": "Steinbearbeitung",
+    "Sternkunde": "Sternkunde",
+    "Stoffbearbeitung": "Stoffbearbeitung",
+    "Tanzen": "Tanzen",
+    "Tierkunde": "Tierkunde",
+    "Ueberreden": "Überreden",
+    "Verbergen": "Verbergen",
+    "Wildnisleben": "Wildnisleben",
+    "Willenskraft": "Willenskraft",
+    "Zechen": "Zechen"
+  },
+
+  "Rules": {
+    "SpecialSchipsTitle": "Regeln zu den Spezial-Schips",
+    "SpecialSchips1": "Spezial-Schips verfügen stets über eine besondere Einsatzmöglichkeit, die nur mit dieser Art von Schip zur Verfügung steht und keine Sonderfertigkeit erfordert. Zudem kann der Held einen Spezial-Schip auch für reguläre Schip-Einsätze nutzen.",
+    "SpecialSchips2": "Werden die Schips über den Einsatz einer Sonderfertigkeit oder einer anderen Fähigkeit generiert, so entstehen stets reguläre Schips. Nur wenn eine Fähigkeit explizit etwas anderes aussagt, können so Spezial-Schips entstehen.",
+    "SpecialSchips3": "Betragen die Kosten für eine Schicksalspunkte-Sonderfertigkeit mehr als 1 Schip, so dürfen hierfür Spezial-Schips und reguläre Schips beliebig kombiniert werden. Der Würfelwurf wird nur einmal durchgeführt, auch wenn mehrere Spezial-Schips im Einsatz sind, und somit wird auch nur ein 1 Schip zurückerstattet. Es muss beim Einsatz immer 1 Schip als der Hauptschip ausgewählt werden. Sind Spezial-Schips im Spiel muss immer mit dem nachstehenden 2W6 gewürfelt werden. Zusätzlich genutzte Spezial-Schips nach dem ersten zählen als reguläre Schips.",
+    "SpecialSchips4": "Erzeugt ein Schip eine Begabung und weist ein Held bereits eine solche in derselben Fertigkeit auf, so können 2W20 noch einmal gewürfelt werden (allerdings kann so nicht derselbe W20 einer Teilprobe zweimal neu gewürfelt werden).",
+    "DiceTitle": "Würfeleinsatz",
+    "DiceHint": "Die für Spezial-Schips genutzten Würfel zeigen auf einem W6 das Erzdämonen-Symbol oder Götter-Symbol anstelle der 6 sowie ein Sternenwall-Symbol oder Kha-Symbol anstelle der 6 auf dem anderen W6.",
+    "Dice1": "Bei Einsatz eines Spezial-Schips wird immer mit beiden beiliegenden W6 gewürfelt.",
+    "Dice2": "Zeigt ein Würfel das Erzdämonen/Götter-Symbol und der andere das Sternenwall/Kha-Symbol (beide Würfel zeigen also ein Symbol), tritt der Schip-Effekt ein und der Schip wird zurückerstattet.",
+    "Dice3": "Fällt ein Erzdämonen-Symbol/Götter-Symbol, aber kein Sternenwall-Symbol/Kha-Symbol auf dem anderen Würfel, darf der eingesetzte Schip durch einen beliebigen anderen Schip, also z. B. einen regulären Schips oder einen Spezial-Schip, ersetzt werden der stattdessen ausgegeben wird. Durch diesen Tausch verändert sich der Schip-Effekt nicht. Es tritt immer der Effekt des ursprünglichen Schips ein.",
+    "Dice4": "Fällt ein Sternenwall-Symbol/Kha-Symbol, aber kein Erzdämonen-Symbol/Götter-Symbol auf dem anderen Würfel, ist der Einsatz des Schips unmöglich; der Schip wird zurückgegeben und für diese Situation ist kein Schip-Einsatz mehr möglich.",
+    "Dice5": "Fällt gar kein Symbol bei beiden Würfeln, tritt der Schip-Effekt ein und der Schip wird verbraucht.",
+    "DemonsInitTitle": "Sonderregeln für Erzdämonen-Schips",
+    "DemonsInit1": "Nach Einsatz des Schips (auch wenn der Schip nicht abgegeben wird, also sobald ein Erzdämonenwürfel geworfen wird) können keine Götter-Schips für spätere Handlungen eingesetzt werden und der Held profitiert nicht mehr von positiven Liturgien oder Segnungen, bis zum nächsten Mal Schips regulär regeneriert werden. Schip-Einsätze, die Schips generieren sind hiervon ausgenommen. Beim aktuellen Schip-Einsatz kann bei einem Wurf Erzdämon-Symbol - kein Sternenwall-Symbol dennoch auch ein anderer Spezial-Schip statt des Erzdämonen-Schips ausgegeben werden.",
+    "DemonsInit2": "Alle Regenerationen werden dauerhaft um -1 reduziert. Die Wirkung ist kumulativ. Bei negativen Regenerationsergebnissen gehen LeP, AsP oder KaP verloren. Sollten keine AsP oder KaP mehr vorhanden sein, gehen stattdessen LeP verloren. Bei 0 LeP stirbt der Held. Der Effekt wirkt, bis der Held das nächste Mal Schips regulär regeneriert hat.",
+    "DemonsInit3": "Wer einen Dämonenpakt eingeht, muss sofort alle Spezial-Schips zu regulären Schips umwandeln. Der Held hat aber die Wahl, die regulären Schips in Schips seines Paktherrn umzuwandeln.",
+    "GodsInitTitle": "Sonderregeln für Götter-Schips",
+    "GodsInit1": "Träger des Makels der Verdammten können keine Götter-Schips erhalten oder einsetzen (Ausnahme: Namenloser).",
+    "GodsInit2": "Wer einen Dämonenpakt eingeht, muss sofort alle Götter-Schips zu regulären Schips umwandeln."
+  },
+
+  "Demon": {
+    "Agrimoth": {
+      "Name": "Agrimoth",
+      "Description": "Der Held bekommt eine Begabung für <b>Fliegen, Holzbearbeitung, Metallbearbeitung, Pflanzenkunde</b> und <b>Steinbearbeitung</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um 2 QS (maximal bis QS 6). Außerdem kann der Held negative Effekte von Überhitzung ablegen (also damit verbundene Zustandsstufen). Der Effekt wird nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Amazeroth": {
+      "Name": "Amazeroth",
+      "Description": "Der Held kann einer Person in Sichtreichweite eine Erschwernis von -4 auf einen Zauber auferlegen. Außerdem kann der Held alle Stufen <b>Verwirrung</b> ablegen, die auch nach dem Ablegen der Probe nicht wieder zurückkehren. Der Effekt hält bis zum Ende der Probe."
+    },
+    "Aphasmayra": {
+      "Name": "Aphasmayra",
+      "Description": "Der Held bekommt eine Begabung für <b>Betören, Klettern, Orientierung</b> und <b>Verbergen</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um 2 QS (maximal bis QS 6). Außerdem kann der Held alle Stufen <b>Paralyse</b> ablegen, die auch nach dem Ablegen der Probe nicht wieder zurückkehren. Der Effekt wird nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Aphestadil": {
+      "Name": "Aphestadil",
+      "Description": "Der Held bekommt eine Begabung für <b>Einschüchtern, Sinnesschärfe</b> und <b>Zechen</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um 2 QS (maximal bis QS 6). Außerdem kann der Held alle Stufen <b>Betäubung</b> ablegen, die nach dem Ablegen der Probe nicht wieder zurückkehren. Der Effekt wird nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Asfaloth": {
+      "Name": "Asfaloth",
+      "Description": "In der nächsten Regenerationsphase erhält der Held zusätzlich <b>3W6 LeP</b> zurück. Außerdem kann der Held 3 beliebige Zustandsstufen ablegen. Der Effekt wirkt nur auf den Helden selbst."
+    },
+    "Belhalhar": {
+      "Name": "Belhalhar",
+      "Description": "Eine gelungene AT des Helden ist automatisch ein <b>kritischer Treffer</b>. Der Effekt hält 1 Attacke lang an. Außerdem kann der Held alle Stufen <b>Schmerz</b> ablegen, die auch nach dem Ablegen der Probe nicht wieder zurückkehren. Der Effekt wirkt nur auf den Helden selbst."
+    },
+    "Belkelel": {
+      "Name": "Belkelel",
+      "Description": "Der Held bekommt eine Begabung für <b>Betören, Einschüchtern, Fesseln, Selbstbeherrschung</b> und <b>Zechen</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um 2 QS (maximal bis QS 6). Außerdem kann der Held alle Stufen <b>Schmerz</b> ablegen, die auch nach dem Ablegen der Probe nicht wieder zurückkehren. Der Effekt wird nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Blakharaz": {
+      "Name": "Blakharaz",
+      "Description": "Der Held bekommt eine Erleichterung von <b>+4</b> auf alle Handlungen, die aus Hass oder Rachsucht ausgeführt werden. Außerdem kann der Held alle Stufen <b>Furcht</b> ablegen, die auch nach dem Ablegen der Probe nicht wieder zurückkehren. Der Effekt wirkt nur auf den Helden selbst."
+    },
+    "Charyptoroth": {
+      "Name": "Charyptoroth",
+      "Description": "Der Held kann sich durch den Schipeinsatz automatisch vor dem Ertrinken retten. Über die genauen Umstände entscheidet die Meisterin. Außerdem kann der Held alle Stufen <b>Betäubung</b> ablegen, die auch nach der Rettung nicht wieder zurückkehren. Der Effekt wirkt nur auf den Helden selbst."
+    },
+    "Heskatet": {
+      "Name": "Heskatet",
+      "Description": "Der Held bekommt eine Begabung für <b>Sagen & Legenden, Sinnesschärfe</b> und <b>Sphärenkunde</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um 2 QS (maximal bis QS 6). Außerdem kann der Held alle Stufen <b>Verwirrung</b> ablegen, die nach dem Ablegen der Probe nicht wieder zurückkehren. Der Effekt wird nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Lolgramoth": {
+      "Name": "Lolgramoth",
+      "Description": "Der Held setzt automatisch die Schicksalspunkte-Option <b>Erster</b> ein und erleidet keinen Malus auf Mehrfachverteidigungen in dieser Kampfrunde. Außerdem kann der Held alle Stufen <b>Paralyse</b> ablegen, die auch nach der Kampfrunde nicht wieder zurückkehren. Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Kampfrunde."
+    },
+    "Mishkara": {
+      "Name": "Mishkara",
+      "Description": "Der Held kann sofort den Status <b>Krank</b> und <b>Vergiftet</b> ablegen. Außerdem kann der Held 3 beliebige Zustandsstufen ablegen. Der Effekt wirkt nur auf den Helden selbst."
+    },
+    "Nagrach": {
+      "Name": "Nagrach",
+      "Description": "Eine gelungene FK des Helden ist automatisch ein <b>kritischer Treffer</b>. Der Effekt hält 1 Attacke lang an. Außerdem kann der Held negative Effekte von Unterkühlung ablegen (also damit verbundene Zustandsstufen). Der Effekt wirkt nur auf den Helden selbst."
+    },
+    "Tasfarel": {
+      "Name": "Tasfarel",
+      "Description": "Der Held bekommt eine Begabung für <b>Handel, Überreden</b> und <b>Verbergen</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um 2 QS (maximal bis QS 6). Außerdem kann der Held 3 beliebige Zustandsstufen ablegen, die auch nach dem Ablegen der Probe nicht wieder zurückkehren. Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Thargunitoth": {
+      "Name": "Thargunitoth",
+      "Description": "Der Held bekommt eine Begabung für <b>Heilkunde Seele, Selbstbeherrschung</b> und <b>Willenskraft</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um 2 QS (maximal bis QS 6). Außerdem kann der Held alle Stufen <b>Furcht</b> ablegen, die nach dem Ablegen der Probe nicht wieder zurückkehren. Der Effekt wird nur auf den Helden selbst und hält bis zum Ende der Probe."
+    }
+  },
+
+  "God": {
+    "Angrosch": {
+      "Name": "Angrosch",
+      "Description": "Der Held bekommt eine Begabung auf <b>Holzbearbeitung, Kraftakt, Mechanik, Metallbearbeitung, Steinbearbeitung</b> und <b>Zechen</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um <b>2 QS</b> (maximal bis <b>QS 6</b>). Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Aves": {
+      "Name": "Aves",
+      "Description": "Der Held kann den Schip für eine beliebige <b>Standard-Schip-Option</b> nutzen. Danach würfelt er mit einem Würfel oder wirft eine Münze. In 50 % der Fälle (muss vorher festgelegt werden, z. B. 1-10 auf 1W20) tritt der Effekt sofort ein zweites Mal ein. Die Verteidigung kann somit um <b>+8</b> statt um <b>+4</b> steigen, oder der Held kann eine Probe erneut wiederholen usw. Der Effekt wirkt nur auf den Helden selbst."
+    },
+    "Boron": {
+      "Name": "Boron",
+      "Description": "Der Held bekommt eine Begabung auf <b>Heilkunde Seele, Menschenkenntnis</b> und <b>Willenskraft</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um <b>2 QS</b> (maximal bis <b>QS 6</b>). Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Brazoragh": {
+      "Name": "Brazoragh",
+      "Description": "Der Held bekommt <b>AT +2</b>, alle Stufen <b>Schmerz</b> und <b>Furcht</b> kann er zudem ignorieren. Der Effekt wirkt nur auf den Helden selbst und hält <b>1 Attacke</b> lang an."
+    },
+    "Efferd": {
+      "Name": "Efferd",
+      "Description": "Der Held bekommt eine Begabung auf <b>Boote & Schiffe, Fischen & Angeln, Körperbeherrschung</b> und <b>Schwimmen</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um <b>2 QS</b> (maximal bis <b>QS 6</b>). Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Firun": {
+      "Name": "Firun",
+      "Description": "Der Held bekommt eine Begabung auf <b>Fährtensuchen, Orientierung, Tierkunde</b> und <b>Wildnisleben</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um <b>2 QS</b> (maximal bis <b>QS 6</b>). Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Hesinde": {
+      "Name": "Hesinde",
+      "Description": "Der Held bekommt eine Begabung auf <b>Geschichtswissen, Götter & Kulte</b> und <b>Magiekunde</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um <b>2 QS</b> (maximal bis <b>QS 6</b>). Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Himmelswölfe": {
+      "Name": "Himmelswölfe",
+      "Description": "Der Held bekommt eine Begabung auf <b>Fährtensuchen, Körperbeherrschung</b> und <b>Wildnisleben</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um <b>2 QS</b> (maximal bis <b>QS 6</b>). Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Ifirn": {
+      "Name": "Ifirn",
+      "Description": "Der Held kann bis zu 3 Gefährten eine Begabung auf <b>Fährtensuchen, Orientierung, Tierkunde</b> und <b>Wildnisleben</b> verleihen. Der Effekt wirkt nicht auf den Helden selbst, sondern nur auf ausgewählte Gefährten und endet mit dem Ablegen der Probe."
+    },
+    "Ingerimm": {
+      "Name": "Ingerimm",
+      "Description": "Der Held bekommt eine Begabung auf <b>Holzbearbeitung, Kraftakt, Mechanik, Lederbearbeitung, Metallbearbeitung</b> und <b>Stoffbearbeitung</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um <b>2 QS</b> (maximal bis <b>QS 6</b>). Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Kamaluq": {
+      "Name": "Kamaluq",
+      "Description": "Der Held bekommt eine Begabung auf <b>Einschüchtern, Klettern, Tierkunde</b> und <b>Wildnisleben</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um <b>2 QS</b> (maximal bis <b>QS 6</b>). Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Kor": {
+      "Name": "Kor",
+      "Description": "Der Held bekommt <b>AT</b> und <b>TP +2</b>. Der Effekt wirkt nur auf den Helden selbst und hält <b>1 Attacke</b> lang an."
+    },
+    "Levthan": {
+      "Name": "Levthan",
+      "Description": "Der Held bekommt eine Begabung auf <b>Betören, Kraftakt, Willenskraft</b> und <b>Zechen</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um <b>2 QS</b> (maximal bis <b>QS 6</b>). Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Mada": {
+      "Name": "Mada",
+      "Description": "Während einer <b>Regenerationsphase</b>, die die Helden an einem gemeinsamen Lager verbringen müssen, kann der Held zusätzlich zu anderen Regenerationen <b>12 AsP</b> auf seine Gefährten verteilen, die sie in der Regenerationsphase zurückbekommen (max. <b>3 AsP</b> pro Gefährte). Der Effekt wirkt nicht auf den Helden selbst, sondern nur auf ausgewählte Gefährten."
+    },
+    "Marbo": {
+      "Name": "Marbo",
+      "Description": "Der Held kann bis zu 3 Gefährten eine Begabung auf <b>Heilkunde Seele, Selbstbeherrschung</b> und <b>Überreden</b> verleihen. Der Effekt wirkt nicht auf den Helden selbst, sondern nur auf ausgewählte Gefährten und endet mit dem Ablegen der Probe."
+    },
+    "Mokoscha": {
+      "Name": "Mokoscha",
+      "Description": "Der Held kann bis zu 3 Gefährten eine Begabung auf <b>Handel, Menschenkenntnis</b> und <b>Selbstbeherrschung</b> verleihen. Der Effekt wirkt nicht auf den Helden selbst, sondern nur auf ausgewählte Gefährten und endet mit dem Ablegen der Probe."
+    },
+    "Namenloser": {
+      "Name": "Namenloser",
+      "Description": "Der Held bekommt eine Begabung auf <b>Bekehren & Überzeugen, Menschenkenntnis, Selbstbeherrschung</b> und <b>Willenskraft</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um <b>2 QS</b> (maximal bis <b>QS 6</b>). Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Nandus": {
+      "Name": "Nandus",
+      "Description": "Der Held kann bis zu 3 Gefährten eine Begabung auf <b>Brett- & Glücksspiele, Geschichtswissen, Geographie</b> und <b>Götter & Kulte</b> verleihen. Der Effekt wirkt nicht auf den Helden selbst, sondern nur auf ausgewählte Gefährten und endet mit dem Ablegen der Probe."
+    },
+    "Numinoru": {
+      "Name": "Numinoru",
+      "Description": "Der Held bekommt eine Begabung auf <b>Fischen & Angeln, Schwimmen</b> und <b>Willenskraft</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um <b>2 QS</b> (maximal bis <b>QS 6</b>). Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Peraine": {
+      "Name": "Peraine",
+      "Description": "Der Held bekommt eine Begabung auf <b>Heilkunde Gift, Heilkunde Krankheiten, Heilkunde Wunden</b> und <b>Pflanzenkunde</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um <b>2 QS</b> (maximal bis <b>QS 6</b>). Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Phex": {
+      "Name": "Phex",
+      "Description": "Der Held kann den Schip für eine beliebige <b>Standard-Schip-Option</b> nutzen. Fällt beim Würfeln ein Göttersymbol, erhält er den Schip zurück. Der Effekt wirkt nur auf den Helden selbst."
+    },
+    "Praios": {
+      "Name": "Praios",
+      "Description": "<b>SK</b> und <b>ZK</b> bekommen einen Bonus von <b>+2</b> gegen einen Zauber. Der Effekt kann nur den Helden selbst betreffen. Nach der Zauberprobe endet der Effekt."
+    },
+    "Rahja": {
+      "Name": "Rahja",
+      "Description": "Der Held bekommt eine Begabung auf <b>Betören, Etikette, Reiten, Tanzen</b> und <b>Zechen</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um <b>2 QS</b> (maximal bis <b>QS 6</b>). Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Rastullah": {
+      "Name": "Rastullah",
+      "Description": "Der Held bekommt eine Begabung auf <b>Orientierung, Rechtskunde, Reiten</b> und <b>Willenskraft</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um <b>2 QS</b> (maximal bis <b>QS 6</b>). Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Rondra": {
+      "Name": "Rondra",
+      "Description": "Der Held bekommt <b>AT</b> und <b>PA +2</b>. Der Effekt wirkt nur auf den Helden selbst und hält <b>1 Kampfrunde</b> lang an."
+    },
+    "Satuaria": {
+      "Name": "Satuaria",
+      "Description": "Der Held bekommt eine Begabung auf <b>Betören, Fliegen, Heilkunde Gift, Heilkunde Krankheiten</b> und <b>Lebensmittelbearbeitung</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um <b>2 QS</b> (maximal bis <b>QS 6</b>). Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Shinxir": {
+      "Name": "Shinxir",
+      "Description": "Der Held kann seine Gefährten stärken. Die Gruppe erhält insgesamt einen Bonus von <b>4 Punkten</b> auf <b>AT</b> oder <b>PA</b> (je max <b>+1</b> pro Gefährten und Wert; wie sich die 4 Punkte über die Gefährten verteilen, ist dem Held überlassen). Der Effekt wirkt nicht auf den Helden selbst, sondern nur auf die ausgewählten Gefährten und hält <b>1 Kampfrunde</b> lang an."
+    },
+    "Simia": {
+      "Name": "Simia",
+      "Description": "Der Held kann bis zu 3 Gefährten eine Begabung auf <b>Holzbearbeitung, Kraftakt, Lederbearbeitung, Mechanik, Metallbearbeitung</b> und <b>Stoffbearbeitung</b> verleihen. Der Effekt wirkt nicht auf den Helden selbst, sondern nur auf ausgewählte Gefährten und endet mit dem Ablegen der Probe."
+    },
+    "Swafnir": {
+      "Name": "Swafnir",
+      "Description": "Der Held bekommt eine Begabung auf <b>Boote & Schiffe, Fischen & Angeln, Körperbeherrschung</b> und <b>Schwimmen</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um <b>2 QS</b> (maximal bis <b>QS 6</b>). Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Tairach": {
+      "Name": "Tairach",
+      "Description": "Der Held bekommt eine Begabung auf <b>Magiekunde, Sternkunde</b> und <b>Willenskraft</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um <b>2 QS</b> (maximal bis <b>QS 6</b>). Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Travia": {
+      "Name": "Travia",
+      "Description": "Während einer <b>Regenerationsphase</b>, die die Helden an einem gemeinsamen Lager verbringen müssen, kann der Held zusätzlich zu anderen Regenerationen <b>12 LeP</b> auf seine Gefährten verteilen, die sie in der Regenerationsphase zurückbekommen (max. <b>3 LeP</b> pro Gefährte). Der Effekt wirkt nicht auf den Helden selbst, sondern nur auf ausgewählte Gefährten."
+    },
+    "Tsa": {
+      "Name": "Tsa",
+      "Description": "Der Held bekommt eine Begabung auf <b>3 beliebige Fertigkeiten</b> mit maximal <b>FW 3</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um <b>2 QS</b> (maximal bis <b>QS 6</b>). Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Ucuri": {
+      "Name": "Ucuri",
+      "Description": "Der Held bekommt eine Begabung auf <b>Bekehren & Überzeugen, Rechtskunde</b> und <b>Sinnesschärfe</b>, und die Schicksalspunkte-Option <b>Qualität verbessern</b> wirkt automatisch auf diese Talente und erhöht diese sogar um <b>2 QS</b> (maximal bis <b>QS 6</b>). Der Effekt wirkt nur auf den Helden selbst und hält bis zum Ende der Probe."
+    },
+    "Xeledon": {
+      "Name": "Xeledon",
+      "Description": "Der Held kann 1 Schip einsetzen, um einen regulären Schipeinsatz für andere Helden oder Meisterpersonen in Sichtweite auszulösen (außer Verteidigung). Die <b>Schicksalspunkt-Option</b> wird aber ins Gegenteil verkehrt. <b>Erster</b> löst z. B. aus, dass die betreffende Person als letztes in der Kampfrunde an der Reihe ist. Der Effekt hält <b>1 Kampfrunde</b> oder Probe lang an."
+    }
+  }
+}
