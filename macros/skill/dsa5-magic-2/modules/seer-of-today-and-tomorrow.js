@@ -1,30 +1,36 @@
 Hooks.on('dsa5.getRollDialogContextOptions', (dialogState, menuItems) => {
     const { source, actor, dialog } = dialogState;
-    if (!source || !["spell", "ritual"].includes(source.type) || !actor) return;
+    if (!source || !["spell", "ritual"].includes(source.type) || !actor || !dialog || dialog._seerInjected) return;
 
     const uneigennuetzigName = game.i18n.localize("LocalizedIDs.selfless");
     const hellsichtName = game.i18n.localize("Features.Clairvoyance");
-    const isHellsicht = (source.system.feature || "").includes(hellsichtName);
+    const abilityName = game.i18n.localize("LocalizedIDs.Seeroftodayandtomorrow"); 
 
-    const widget = dialog?.element?.querySelector?.('[is="dsa-situationalmodifiers"]');
-    if (!widget) return;
+    const ability = actor.items.find(i => i.name.includes(abilityName) || i.name.includes(uneigennuetzigName));
+    if (!ability) return;
+
+    if (source.system.feature?.includes(hellsichtName)) return;
 
     const targets = Array.from(game.user.targets);
     const isSelfTarget = targets.length === 0 || targets.some(t => t.actor?.id === actor.id);
 
-    if (isHellsicht) {
-        const hasMod = Array.from(widget.querySelectorAll('option')).some(opt => opt.text.includes(uneigennuetzigName));
-        if (hasMod) {
-            widget.removeModifier(mod => mod.name && mod.name.includes(uneigennuetzigName));
-            widget.dispatchChange();
-        }
-    } else {
-        const select = widget.querySelector('select');
-        const option = Array.from(select.options).find(opt => opt.text.includes(uneigennuetzigName));
-        
-        if (option && option.selected !== isSelfTarget) {
-            option.selected = isSelfTarget;
-            widget.dispatchChange();
-        }
+    class SeerHelper extends game.dsa5.api.RollDialogBurgerMenuRule {
+        constructor() { super({ abilityNameKey: 'dummy' }); }
+    }
+    
+    const helper = new SeerHelper();
+    const widget = helper.getSituationalModifiersWidget(dialog);
+
+    if (widget) {
+        helper.upsertModifier(dialog, {
+            name: uneigennuetzigName,
+            value: 2,
+            selected: isSelfTarget,
+            source: ability.name,
+            type: "AsPCost"
+        });
+
+        widget.dispatchChange();
+        dialog._seerInjected = true; 
     }
 });
