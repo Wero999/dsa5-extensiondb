@@ -6,7 +6,7 @@ Hooks.on('dsa5.getRollDialogContextOptions', (dialogState, menuItems) => {
     const hellsichtName = game.i18n.localize("Features.Clairvoyance");
     const abilityName = game.i18n.localize("LocalizedIDs.Seeroftodayandtomorrow"); 
 
-    const ability = actor.items.find(i => i.name.includes(abilityName) || i.name.includes(uneigennuetzigName));
+    const ability = actor.items.find(i => i.name.includes(abilityName));
     if (!ability) return;
 
     if (source.system.feature?.includes(hellsichtName)) return;
