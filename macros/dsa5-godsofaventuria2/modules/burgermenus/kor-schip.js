@@ -1,17 +1,17 @@
 const KOR_SCHIP_HOOK_KEY = 'dsa5-gods.kor-schip';
 
 function registerKorSchipHooks() {
+    const _loc = key => game.i18n.localize(key);
+    const _format = (key, data) => game.i18n.format(key, data);
+
     class KorSchipBurgerMenu extends game.dsa5.api.RollDialogBurgerMenuRule {
         constructor() {
             super({ abilityNameKey: 'God.Kor.Name' }); 
         }
 
         matches(dialogState) {
-            const isAttack = dialogState?.testData?.mode === 'attack';
-            if (!isAttack) return false;
-
-            const actor = dialogState?.actor;
-            if (!actor) return false;
+            const { testData, actor } = dialogState;
+            if (testData?.mode !== 'attack' || !actor) return false;
 
             const currentKorSchips = foundry.utils.getProperty(actor, "flags.dsa5.specialPoints.Kor.current") || 0;
             return currentKorSchips > 0;
@@ -19,27 +19,28 @@ function registerKorSchipHooks() {
 
         getBurgerMenuItems(dialogState) {
             return [{
-                label: game.i18n.localize("GodsMenu.KorSchipName"), 
+                label: _loc("GodsMenu.KorSchipName"), 
                 icon: '<i class="schip tiny fullSchip" style="background-image: url(\'modules/dsa5-godsofaventuria2/icons/chips/Kor.webp\'); display: inline-block !important; vertical-align: middle !important; margin-right: 8px; border: none; box-shadow: none;"></i>',
                 onClick: async () => {
-                    const modNameAT = game.i18n.localize("GodsMenu.KorSchipNameAT");
-                    const modNameTP = game.i18n.localize("GodsMenu.KorSchipNameTP");
+                    const { dialog } = dialogState;
+                    const modNameAT = _loc("GodsMenu.KorSchipNameAT");
+                    const modNameTP = _loc("GodsMenu.KorSchipNameTP");
 
-                    if (this.hasModifierApplied(dialogState.dialog, modNameAT) || this.hasModifierApplied(dialogState.dialog, modNameTP)) {
-                        ui.notifications.warn(game.i18n.localize("GodsMenu.KorSchipAlreadyActive"));
+                    if (this.hasModifierApplied(dialog, modNameAT) || this.hasModifierApplied(dialog, modNameTP)) {
+                        ui.notifications.warn(_loc("GodsMenu.KorSchipAlreadyActive"));
                         return;
                     }
 
-                    const sourceText = game.i18n.localize("GodsMenu.KorSchipSource");
+                    const sourceText = _loc("GodsMenu.KorSchipSource");
 
-                    this.upsertModifier(dialogState.dialog, {
+                    this.upsertModifier(dialog, {
                         name: modNameAT,
                         value: 2,
                         selected: true,
                         source: sourceText
                     });
 
-                    this.upsertModifier(dialogState.dialog, {
+                    this.upsertModifier(dialog, {
                         name: modNameTP,
                         value: 2,
                         type: 'dmg', 
@@ -47,10 +48,8 @@ function registerKorSchipHooks() {
                         source: sourceText
                     });
 
-                    const widget = this.getSituationalModifiersWidget(dialogState.dialog);
-                    if (widget && typeof widget.dispatchChange === 'function') {
-                        widget.dispatchChange();
-                    }
+                    const widget = this.getSituationalModifiersWidget(dialog);
+                    if (widget) widget.dispatchChange();
                 }
             }];
         }
@@ -59,16 +58,17 @@ function registerKorSchipHooks() {
     const korSchipMenu = new KorSchipBurgerMenu();
 
     Hooks.on('dsa5.getRollDialogContextOptions', (dialogState, menuItems) => {
-        if (!korSchipMenu.matches(dialogState)) return;
-        menuItems.push(...korSchipMenu.getBurgerMenuItems(dialogState));
+        if (korSchipMenu.matches(dialogState)) {
+            menuItems.push(...korSchipMenu.getBurgerMenuItems(dialogState));
+        }
     });
 
-    Hooks.on("postProcessDSARoll", async (chatOptions, testData, rerenderMessage, hideDamage) => {
-        const preData = testData.preData;
+    Hooks.on("postProcessDSARoll", async (chatOptions, testData) => {
+        const { preData } = testData;
         if (!preData) return;
 
-        const modNameAT = game.i18n.localize("GodsMenu.KorSchipNameAT");
-        const modNameTP = game.i18n.localize("GodsMenu.KorSchipNameTP");
+        const modNameAT = _loc("GodsMenu.KorSchipNameAT");
+        const modNameTP = _loc("GodsMenu.KorSchipNameTP");
 
         const hasModifier = preData.situationalModifiers?.some(mod =>
             mod.name === modNameAT || mod.name === modNameTP
@@ -86,7 +86,7 @@ function registerKorSchipHooks() {
                 const currentKor = foundry.utils.getProperty(actor, "flags.dsa5.specialPoints.Kor.current") || 0;
                 if (currentKor > 0) {
                     await actor.update({ "flags.dsa5.specialPoints.Kor.current": currentKor - 1 });
-                    ui.notifications.info(game.i18n.format("GodsMenu.KorSchipConsumed", { name: actor.name }));
+                    ui.notifications.info(_format("GodsMenu.KorSchipConsumed", { name: actor.name }));
                 }
             }
         }
