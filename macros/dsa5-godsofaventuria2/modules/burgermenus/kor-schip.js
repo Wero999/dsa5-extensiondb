@@ -1,9 +1,6 @@
 const KOR_SCHIP_HOOK_KEY = 'dsa5-gods.kor-schip';
 
 function registerKorSchipHooks() {
-    const _loc = key => game.i18n.localize(key);
-    const _format = (key, data) => game.i18n.format(key, data);
-
     class KorSchipBurgerMenu extends game.dsa5.api.RollDialogBurgerMenuRule {
         constructor() {
             super({ abilityNameKey: 'God.Kor.Name' }); 
@@ -86,7 +83,7 @@ function registerKorSchipHooks() {
                 const currentKor = foundry.utils.getProperty(actor, "flags.dsa5.specialPoints.Kor.current") || 0;
                 if (currentKor > 0) {
                     await actor.update({ "flags.dsa5.specialPoints.Kor.current": currentKor - 1 });
-                    ui.notifications.info(_format("GodsMenu.KorSchipConsumed", { name: actor.name }));
+                    ui.notifications.info(game.i18n.format("GodsMenu.KorSchipConsumed", { name: actor.name }));
                 }
             }
         }
