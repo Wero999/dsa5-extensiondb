@@ -84,7 +84,7 @@ function registerBrazoraghSchipHooks() {
                 const currentBrazoragh = foundry.utils.getProperty(actor, "flags.dsa5.specialPoints.Brazoragh.current") || 0;
                 if (currentBrazoragh > 0) {
                     await actor.update({ "flags.dsa5.specialPoints.Brazoragh.current": currentBrazoragh - 1 });
-                    ui.notifications.info(game.i18n.format("GodsMenu.BrazoraghSchipConsumed", { name: actor.name }));
+                    ui.notifications.info(_loc("GodsMenu.BrazoraghSchipConsumed", { name: actor.name }));
                 }
             }
         }
