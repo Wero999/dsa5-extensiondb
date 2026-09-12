@@ -83,7 +83,7 @@ function registerKorSchipHooks() {
                 const currentKor = foundry.utils.getProperty(actor, "flags.dsa5.specialPoints.Kor.current") || 0;
                 if (currentKor > 0) {
                     await actor.update({ "flags.dsa5.specialPoints.Kor.current": currentKor - 1 });
-                    ui.notifications.info(game.i18n.format("GodsMenu.KorSchipConsumed", { name: actor.name }));
+                    ui.notifications.info(_loc("GodsMenu.KorSchipConsumed", { name: actor.name }));
                 }
             }
         }
