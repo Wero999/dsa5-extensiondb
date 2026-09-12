@@ -2,8 +2,6 @@ Hooks.on('dsa5.getRollDialogContextOptions', (dialogState, menuItems) => {
     const { source, actor, dialog } = dialogState;
     if (!source || !["spell", "ritual"].includes(source.type) || !actor || !dialog || dialog._seerInjected) return;
 
-    const _loc = key => game.i18n.localize(key);
-
     const uneigennuetzigName = _loc("LocalizedIDs.selfless");
     const hellsichtName = _loc("Features.Clairvoyance");
     const abilityName = _loc("LocalizedIDs.Seeroftodayandtomorrow"); 
