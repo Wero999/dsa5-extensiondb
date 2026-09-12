@@ -1,9 +1,6 @@
 const BRAZORAGH_SCHIP_HOOK_KEY = 'dsa5-gods.brazoragh-schip';
 
 function registerBrazoraghSchipHooks() {
-    const _loc = key => game.i18n.localize(key);
-    const _format = (key, data) => game.i18n.format(key, data);
-
     class BrazoraghSchipBurgerMenu extends game.dsa5.api.RollDialogBurgerMenuRule {
         constructor() {
             super({ abilityNameKey: 'God.Brazoragh.Name' }); 
@@ -87,7 +84,7 @@ function registerBrazoraghSchipHooks() {
                 const currentBrazoragh = foundry.utils.getProperty(actor, "flags.dsa5.specialPoints.Brazoragh.current") || 0;
                 if (currentBrazoragh > 0) {
                     await actor.update({ "flags.dsa5.specialPoints.Brazoragh.current": currentBrazoragh - 1 });
-                    ui.notifications.info(_format("GodsMenu.BrazoraghSchipConsumed", { name: actor.name }));
+                    ui.notifications.info(game.i18n.format("GodsMenu.BrazoraghSchipConsumed", { name: actor.name }));
                 }
             }
         }
