@@ -70,7 +70,7 @@ function registerFinagebastHooks() {
                 const skillName = game.i18n.localize("LocalizedIDs.treatWounds");
                 const effectData = {
                     name: finagebast.name,
-                    img: finagebast.img,
+                    img: "icons/svg/aura.svg",
                     type: "base",
                     transfer: false,
                     system: {
