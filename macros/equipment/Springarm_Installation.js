@@ -13,7 +13,8 @@ const dict = {
         success: (name, hand) => `${name} wurde im Springarm installiert.`,
         current: "Aktuell installiert:",
         none: "Keiner",
-        noActor: "Kein Akteur gefunden."
+        noActor: "Kein Akteur gefunden.",
+        combatSkill: "Dolche"
     },
     en: {
         title: "Configure Springarm",
@@ -25,7 +26,8 @@ const dict = {
         success: (name, hand) => `${name} was installed in the Springarm.`,
         current: "Currently installed:",
         none: "None",
-        noActor: "No actor found."
+        noActor: "No actor found.",
+        combatSkill: "Daggers"
     }
 }[lang];
 
@@ -39,7 +41,7 @@ const FLAG_KEY = "springarmSetup";
 
 const isDagger = (entry) => {
     if (entry.type !== "meleeweapon") return false;
-    return entry.system.combatskill?.value === "Dolche" || _loc(`LocalizedCTs.${entry.system.combatskill?.value}`) === "Daggers";
+    return entry.system.combatskill?.value === dict.combatSkill;
 };
 
 const getEligibleDaggers = () => actor.items.filter(isDagger);
@@ -185,7 +187,7 @@ class SpringarmApp extends ApplicationV2 {
         const currentlyStored = actor.items.filter(i => i.system.parent_id === item.id);
         for (const storedItem of currentlyStored) {
             if (storedItem.id !== this.selectedWeaponId) {
-                updates.push({ _id: storedItem.id, "system.parent_id": 0 });
+                updates.push({ _id: storedItem.id, "system.parent_id": "0" });
             }
         }
 
