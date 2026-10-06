@@ -1,6 +1,6 @@
 // This is a system macro used for automation. It is disfunctional without the proper context.
 
-const lang = game.i18n.lang == "de" ? "de" : "en";
+const lang = game.i18n.lang === "de" ? "de" : "en";
 
 const dict = {
     de: {
@@ -57,69 +57,66 @@ function findItems(names) {
 }
 
 const PIPE_TEMPLATE_STRING = `
-<div id="dsa-pipe-macro-container" class="dsa5-smoking-macro" style="height: 100%; overflow-y: auto; overflow-x: hidden; padding-right: 5px; min-width: 400px;">
-    <div style="margin-bottom: 10px;">
-        <p style="font-family: 'Times New Roman', serif; font-size: 10pt; font-style: italic; margin-bottom: 5px;">{{dict.header}}</p>
-    </div>
-    <div style="margin-bottom: 10px;">
-        <p>{{dict.description}}</p>
-        <p><i>{{dict.question}}</i></p>
+<div class="dsa5-smoking-macro thinscroll height100 dsapr-1">
+    
+    <div class="dsa-info-box marginBottom">
+        <h3><i>{{dict.header}}</i></h3>
+        <p class="dsa-info-text">{{dict.description}}</p>
+        <p class="dsa-info-text center"><b>{{dict.question}}</b></p>
     </div>
 
-    <div class="mode-buttons" style="display: flex; justify-content: space-between; margin-bottom: 15px; gap: 5px;">
-        <button type="button" data-action="setMode" data-mode="tobacco" class="dsa5 button {{#if (eq mode 'tobacco')}}active-mode{{/if}}" style="flex:1; padding: 0 5px;">{{dict.btnTobacco}}</button>
-        <button type="button" data-action="setMode" data-mode="mixed" class="dsa5 button {{#if (eq mode 'mixed')}}active-mode{{/if}}" style="flex:1; padding: 0 5px;">{{dict.btnMixed}}</button>
-        <button type="button" data-action="setMode" data-mode="herbs" class="dsa5 button {{#if (eq mode 'herbs')}}active-mode{{/if}}" style="flex:1; padding: 0 5px;">{{dict.btnHerbs}}</button>
+    <div class="combatGripControls row-section marginBottom">
+        <button type="button" data-action="setMode" data-mode="tobacco" class="dsadesignbutton {{#if (eq mode 'tobacco')}}active{{/if}}">{{dict.btnTobacco}}</button>
+        <button type="button" data-action="setMode" data-mode="mixed" class="dsadesignbutton {{#if (eq mode 'mixed')}}active{{/if}}">{{dict.btnMixed}}</button>
+        <button type="button" data-action="setMode" data-mode="herbs" class="dsadesignbutton {{#if (eq mode 'herbs')}}active{{/if}}">{{dict.btnHerbs}}</button>
     </div>
 
     <div id="selection-area">
         {{#if isModeNull}}
-            <p style="text-align: center; color: #666; margin: 15px 0;">{{dict.placeholder}}</p>
+            <p class="center dsamy-4" style="opacity: 0.7;"><i>{{dict.placeholder}}</i></p>
         {{else}}
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+            <div class="row-section wrap gap10px">
                 {{#if showTobacco}}
-                <div style="flex: 1 1 180px; text-align: center;">
-                    <label style="font-weight: bold;">{{dict.labelTobacco}}</label>
+                <div class="center groupbox paddingBox dsam-0" style="flex: 1 1 180px;">
+                    <div class="table-title">{{dict.labelTobacco}}</div>
                     <div data-action="openSheet" data-item-id="{{selectedTobacco.id}}" data-tooltip="{{dict.slotTooltip}}"
-                         style="width: 48px; height: 48px; border: {{#if selectedTobacco}}2px solid #000{{else}}2px dashed #777{{/if}}; margin: 5px auto; background-size: cover; background-position: center; cursor: pointer; {{#if selectedTobacco}}background-image: url('{{selectedTobacco.img}}');{{/if}}">
+                         class="slot dsamy-1 dsamx-auto" style="{{#if selectedTobacco}}background-image: url('{{selectedTobacco.img}}');{{/if}}">
                     </div>
-                    <div style="min-height: 1.2em; font-size: 0.9em; font-weight: bold; color: #444; margin-bottom: 5px;">{{selectedTobacco.name}}</div>
-                    <div style="margin-top: 5px; border-top: 1px solid #ccc; padding-top: 5px; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center;">
+                    <div class="dsamb-1"><b>{{#if selectedTobacco}}{{selectedTobacco.name}}{{else}}&nbsp;{{/if}}</b></div>
+                    
+                    <div class="row-section wrap gap2px flexAlignCenter dsapt-1" style="border-top: 1px solid var(--border-color);">
                         {{#if availableTobacco.length}}
                             {{#each availableTobacco as |item|}}
-                            <div style="display: flex; flex-direction: column; align-items: center; width: 34px;">
-                                <div data-action="selectTobacco" data-id="{{item.id}}" data-dblclick-sheet data-tooltip="{{item.name}}" 
-                                     style="width: 32px; height: 32px; border: 2px solid {{#if item.isSelected}}#968678{{else}}transparent{{/if}}; box-shadow: 0 0 0 1px #999; cursor: pointer; background-image: url('{{item.img}}'); background-size: cover;">
-                                </div>
-                                <span style="font-size: 10px; color: #333; margin-top: 2px;">{{item.qty}}</span>
-                            </div>
+                            <a class="dsa-icon-count {{#if item.isSelected}}selected{{/if}}" data-action="selectTobacco" data-id="{{item.id}}" data-dblclick-sheet data-tooltip="{{item.name}}">
+                                <div class="image" style="background-image: url('{{item.img}}');"></div>
+                                <span class="dsa-icon-count__qty">{{item.qty}}</span>
+                            </a>
                             {{/each}}
                         {{else}}
-                            <p style="font-size: 0.8em; color: #999;">{{dict.noItems}}</p>
+                            <p class="small">{{dict.noItems}}</p>
                         {{/if}}
                     </div>
                 </div>
                 {{/if}}
 
                 {{#if showHerbs}}
-                <div style="flex: 1 1 180px; text-align: center;">
-                    <label style="font-weight: bold;">{{dict.labelHerb}}</label>
+                <div class="center groupbox paddingBox dsam-0" style="flex: 1 1 180px;">
+                    <div class="table-title">{{dict.labelHerb}}</div>
                     <div data-action="openSheet" data-item-id="{{selectedHerb.id}}" data-tooltip="{{dict.slotTooltip}}"
-                         style="width: 48px; height: 48px; border: {{#if selectedHerb}}2px solid #000{{else}}2px dashed #777{{/if}}; margin: 5px auto; background-size: cover; background-position: center; cursor: pointer; {{#if selectedHerb}}background-image: url('{{selectedHerb.img}}');{{/if}}">
+                         class="slot dsamy-1 dsamx-auto" style="{{#if selectedHerb}}background-image: url('{{selectedHerb.img}}');{{/if}}">
                     </div>
-                    <div style="min-height: 1.2em; font-size: 0.9em; font-weight: bold; color: #444; margin-bottom: 5px;">{{selectedHerb.name}}</div>
-                    <div style="margin-top: 5px; border-top: 1px solid #ccc; padding-top: 5px; display: flex; flex-wrap: wrap; gap: 5px; justify-content: center;">
+                    <div class="dsamb-1"><b>{{#if selectedHerb}}{{selectedHerb.name}}{{else}}&nbsp;{{/if}}</b></div>
+                    
+                    <div class="row-section wrap gap2px flexAlignCenter dsapt-1" style="border-top: 1px solid var(--border-color);">
                         {{#if availableHerbs.length}}
                             {{#each availableHerbs as |item|}}
-                            <div style="display: flex; flex-direction: column; align-items: center; width: 34px;">
-                                <div data-action="selectHerb" data-id="{{item.id}}" data-dblclick-sheet data-tooltip="{{item.name}}" 
-                                     style="width: 32px; height: 32px; border: 2px solid {{#if item.isSelected}}#968678{{else}}transparent{{/if}}; box-shadow: 0 0 0 1px #999; cursor: pointer; background-image: url('{{item.img}}'); background-size: cover;">
-                                </div>
-                                <span style="font-size: 10px; color: #333; margin-top: 2px;">{{item.qty}}</span>
-                            </div>
+                            <a class="dsa-icon-count {{#if item.isSelected}}selected{{/if}}" data-action="selectHerb" data-id="{{item.id}}" data-dblclick-sheet data-tooltip="{{item.name}}">
+                                <div class="image" style="background-image: url('{{item.img}}');"></div>
+                                <span class="dsa-icon-count__qty">{{item.qty}}</span>
+                            </a>
                             {{/each}}
                         {{else}}
-                            <p style="font-size: 0.8em; color: #999;">{{dict.noItems}}</p>
+                            <p class="small">{{dict.noItems}}</p>
                         {{/if}}
                     </div>
                 </div>
@@ -128,9 +125,9 @@ const PIPE_TEMPLATE_STRING = `
         {{/if}}
     </div>
 
-    <footer class="form-footer" style="display: flex; gap: 5px; margin-top: 15px;">
-        <button type="button" data-action="smoke" class="dsa5 button" style="flex:1"><i class="fas fa-smoking"></i> {{dict.smoke}}</button>
-        <button type="button" data-action="cancel" class="dsa5 button" style="flex:1"><i class="fas fa-times"></i> {{dict.cancel}}</button>
+    <footer class="row-section gap5px margin-top">
+        <button type="button" data-action="smoke" class="col two dsa5 button"><i class="fas fa-smoking"></i> {{dict.smoke}}</button>
+        <button type="button" data-action="cancel" class="col two dsa5 button"><i class="fas fa-times"></i> {{dict.cancel}}</button>
     </footer>
 </div>
 `;
@@ -151,7 +148,7 @@ class PipeApp extends ApplicationV2 {
             selectTobacco: function(e, t) { this._onSelectTobacco(e, t); },
             selectHerb: function(e, t) { this._onSelectHerb(e, t); },
             openSheet: function(e, t) { this._onOpenSheet(e, t); },
-            smoke: function() { this._onSmoke(); },
+            smoke: async function(e, t) { await this._onSmoke(e, t); },
             cancel: function() { this.close(); }
         }
     };
@@ -162,15 +159,6 @@ class PipeApp extends ApplicationV2 {
         this.mode = null; 
         this.selectedTobaccoId = null;
         this.selectedHerbId = null;
-
-        const styleId = "pipe-macro-styles";
-        if (!document.getElementById(styleId)) {
-            document.head.insertAdjacentHTML("beforeend", `
-                <style id="${styleId}">
-                    #dsa-pipe-macro-container .active-mode { background: #968678 !important; color: white !important; border-color: #7a7971 !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.15) !important; }
-                </style>
-            `);
-        }
    }
 
     async _renderHTML(context, options) {
@@ -198,16 +186,19 @@ class PipeApp extends ApplicationV2 {
             id: i.id, name: i.name, img: i.img, qty: i.system.quantity.value,
             isSelected: i.id === this.selectedHerbId
         }));
+        
         let selTobacco = null;
         if (this.selectedTobaccoId) {
             const i = this.dsaActor.items.get(this.selectedTobaccoId);
             if (i) selTobacco = { id: i.id, name: i.name, img: i.img };
         }
+        
         let selHerb = null;
         if (this.selectedHerbId) {
             const i = this.dsaActor.items.get(this.selectedHerbId);
             if (i) selHerb = { id: i.id, name: i.name, img: i.img };
         }
+        
         return {
             dict: dict, mode: this.mode, isModeNull: this.mode === null,
             showTobacco: this.mode === 'tobacco' || this.mode === 'mixed',
@@ -253,28 +244,24 @@ class PipeApp extends ApplicationV2 {
             const item = this.dsaActor.items.get(itemId);
             if (!item) return;
 
-            const token = canvas.tokens.placeables.find(t => t.actor?.id === this.dsaActor.id) || this.dsaActor.getActiveTokens()[0];
+            const token = this.dsaActor.getActiveTokens()[0] || canvas.tokens.placeables.find(t => t.actor?.id === this.dsaActor.id);
             if (token) {
                 token.setTarget(true, {user: game.user, releaseOthers: true});
             }
 
             try {
-                const setupPromise = item.setupEffect();
-                if (setupPromise && typeof setupPromise.then === 'function') {
-                    setupPromise.then(setupData => {
-                        if (!setupData) return;
+                const setupData = await item.setupEffect();
+                if (!setupData) return;
 
-                        const td = setupData.testData || setupData;
-                        
-                        if (!td.characteristics && !td.source) return;
+                const td = setupData.testData || setupData;
+                if (!td.characteristics && !td.source) return;
 
-                        td.source = td.source || item.toObject(); 
-                        if (!td.extra) td.extra = {};
-                        td.extra.speaker = td.extra.speaker || ChatMessage.getSpeaker({ actor: this.dsaActor });
-                        
-                        item.itemTest(setupData);
-                    });
-                } 
+                td.source = td.source || item.toObject(); 
+                if (!td.extra) td.extra = {};
+                
+                td.extra.speaker = td.extra.speaker || ChatMessage.getSpeaker({ actor: this.dsaActor, token: token?.document });
+                
+                await item.itemTest(setupData);
             } catch (e) {
                 console.warn("Rauch-Makro: Fehler bei Effekt-Setup.", e);
             }
@@ -283,6 +270,7 @@ class PipeApp extends ApplicationV2 {
         const consumeItem = async (itemId) => {
             const item = this.dsaActor.items.get(itemId);
             if (!item) return;
+            
             const currentQty = item.system.quantity.value;
             if (currentQty <= 1) {
                 await this.dsaActor.deleteEmbeddedDocuments("Item", [itemId]);
@@ -293,7 +281,7 @@ class PipeApp extends ApplicationV2 {
 
         if (this.selectedTobaccoId) {
             await triggerItem(this.selectedTobaccoId);
-            await consumeItem(this.selectedTobaccoId);
+            await consumeItem(this.selectedTobaccoId); 
         }
 
         if (this.selectedHerbId) {
