@@ -29,7 +29,7 @@ const targets = Array.from(game.user.targets);
 if (targets.length !== 1) return ui.notifications.warn(dict.noTarget);
 
 const targetActor = targets[0].actor;
-const FLAG_SCOPE = "dsa5-elementarium";
+const FLAG_SCOPE = "dsa5-riverlands";
 const FLAG_KEY = "springarmSetup";
 const setup = item.getFlag(FLAG_SCOPE, FLAG_KEY);
 
