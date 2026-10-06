@@ -25,7 +25,7 @@ if (!actor) {
   const needsConf  = [false, false, false, false, false, true][qs - 1]; // Verwirrung bei QS 6
 
   const changes = [];
-  // if (sightMod > 0)    changes.push({ key: "system.sightModifier", mode: 2, value: sightMod });
+  if (sightMod > 0) changes.push({ key: "system.sightModifier.value", mode: 2, value: sightMod }, { key: "system.sightModifier.maxLevel", mode: 5, value: 4 }); // Quelle für dieses Vorgehen ist das Dunkelheitsmakro (welches aktuell aber nicht für mich funktioniert)
   if (sightbonus > 0)  changes.push({ key: "system.skillModifiers.step", mode: 0, value: `${dict.perception} ${sightbonus}` });
   if (awBonus > 0)     changes.push({ key: "system.status.dodge.gearmodifier", mode: 2, value: awBonus }); 
   if (needsConf)       changes.push({ key: "system.condition.confused", mode: 2, value: 1 });
