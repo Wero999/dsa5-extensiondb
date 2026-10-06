@@ -36,7 +36,7 @@ if (!actor) {
     return;
 }
 
-const FLAG_SCOPE = "dsa5-elementarium";
+const FLAG_SCOPE = "dsa5-riverlands";
 const FLAG_KEY = "springarmSetup";
 
 const isDagger = (entry) => {
