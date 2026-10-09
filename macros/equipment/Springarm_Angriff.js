@@ -3,9 +3,9 @@ const dict = {
     de: {
         noActor: "Kein Akteur gefunden.",
         noTarget: "Bitte markiere genau ein Ziel für den Angriff.",
-        notConfigured: "Das Item ist nicht konfiguriert (keine Waffe zugewiesen).",
+        notConfigured: "Der Springarm ist nicht konfiguriert (keine Waffe zugewiesen).",
         noWeapon: "Die zugewiesene Waffe wurde nicht im Inventar gefunden.",
-        noSkill: "Das benötigte Talent wurde nicht gefunden.",
+        noSkill: "Talent 'Körperbeherrschung' nicht gefunden",
         fumbleMsg: (name, dmg) => `<b>${name}</b> hat im falschen Moment zugegriffen! Der Dolch fällt zu Boden und verursacht <b>${dmg} SP</b>.`,
         successMsg: (name, weapon) => `<b>${name}</b> löst den Mechanismus aus und zückt <b>${weapon}</b>!`,        
         twoHandedCTs: ["Zweihandschwerter", "Zweihandhiebwaffen", "Stangenwaffen"]
@@ -15,7 +15,7 @@ const dict = {
         noTarget: "Please target exactly one token for the attack.",
         notConfigured: "The item is not configured (no weapon assigned).",
         noWeapon: "The assigned weapon was not found in the inventory.",
-        noSkill: "Required skill not found.",
+        noSkill: "Skill 'Body Control' not found.",
         fumbleMsg: (name, dmg) => `<b>${name}</b> grabbed at the wrong moment! The dagger falls to the ground and deals <b>${dmg} DP</b>.`,
         successMsg: (name, weapon) => `<b>${name}</b> triggers the mechanism and draws <b>${weapon}</b>!`,
         twoHandedCTs: ["Two-Handed Swords", "Two-Handed Impact Weapons", "Polearms"]
