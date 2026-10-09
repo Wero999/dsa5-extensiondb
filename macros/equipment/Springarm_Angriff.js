@@ -3,21 +3,21 @@ const dict = {
     de: {
         noActor: "Kein Akteur gefunden.",
         noTarget: "Bitte markiere genau ein Ziel für den Angriff.",
-        notConfigured: "Der Springarm ist nicht konfiguriert (keine Waffe zugewiesen).",
+        notConfigured: "Das Item ist nicht konfiguriert (keine Waffe zugewiesen).",
         noWeapon: "Die zugewiesene Waffe wurde nicht im Inventar gefunden.",
-        noSkill: "Talent 'Körperbeherrschung' nicht gefunden.",
+        noSkill: "Das benötigte Talent wurde nicht gefunden.",
         fumbleMsg: (name, dmg) => `<b>${name}</b> hat im falschen Moment zugegriffen! Der Dolch fällt zu Boden und verursacht <b>${dmg} SP</b>.`,
-        successMsg: (name, weapon) => `<b>${name}</b> löst den Springarm aus und zückt <b>${weapon}</b>!`,
+        successMsg: (name, weapon) => `<b>${name}</b> löst den Mechanismus aus und zückt <b>${weapon}</b>!`,        
         twoHandedCTs: ["Zweihandschwerter", "Zweihandhiebwaffen", "Stangenwaffen"]
     },
     en: {
         noActor: "No actor found.",
         noTarget: "Please target exactly one token for the attack.",
-        notConfigured: "The Springarm is not configured (no weapon assigned).",
+        notConfigured: "The item is not configured (no weapon assigned).",
         noWeapon: "The assigned weapon was not found in the inventory.",
-        noSkill: "Skill 'Body Control' not found.",
+        noSkill: "Required skill not found.",
         fumbleMsg: (name, dmg) => `<b>${name}</b> grabbed at the wrong moment! The dagger falls to the ground and deals <b>${dmg} DP</b>.`,
-        successMsg: (name, weapon) => `<b>${name}</b> triggers the Springarm and draws <b>${weapon}</b>!`,
+        successMsg: (name, weapon) => `<b>${name}</b> triggers the mechanism and draws <b>${weapon}</b>!`,
         twoHandedCTs: ["Two-Handed Swords", "Two-Handed Impact Weapons", "Polearms"]
     }
 }[lang];
@@ -30,7 +30,7 @@ if (targets.length !== 1) return ui.notifications.warn(dict.noTarget);
 
 const targetActor = targets[0].actor;
 const FLAG_SCOPE = "dsa5-riverlands";
-const FLAG_KEY = "springarmSetup";
+const FLAG_KEY = "SpringarmSetup"; 
 const setup = item.getFlag(FLAG_SCOPE, FLAG_KEY);
 
 if (!setup || !setup.daggerId) return ui.notifications.warn(dict.notConfigured);
@@ -39,12 +39,14 @@ const weapon = sourceActor.items.get(setup.daggerId);
 if (!weapon) return ui.notifications.warn(dict.noWeapon);
 
 const isOffHand = setup.hand === "off";
-const bodyControlLoc = _loc("LocalizedIDs.bodyControl");
-const bodyControlSkill = sourceActor.items.find(i => i.type === "skill" && i.name === bodyControlLoc);
 
-if (!bodyControlSkill) return ui.notifications.error(dict.noSkill);
+const requiredSkillLoc = _loc("LocalizedIDs.bodyControl");
 
-const skillSetupData = await sourceActor.setupSkill(bodyControlSkill.toObject(), { skipDialog: true }, sourceActor.sheet?.getTokenId());
+const requiredSkill = sourceActor.items.find(i => i.type === "skill" && i.name === requiredSkillLoc);
+
+if (!requiredSkill) return ui.notifications.error(dict.noSkill);
+
+const skillSetupData = await sourceActor.setupSkill(requiredSkill.toObject(), { skipDialog: true }, sourceActor.sheet?.getTokenId());
 const testResult = await sourceActor.basicTest(skillSetupData);
 const successLevel = testResult?.result?.successLevel ?? 0;
 
