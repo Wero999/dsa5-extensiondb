@@ -18,6 +18,7 @@ const dict = {
 }[lang];
 
 const currentQs = typeof qs !== 'undefined' ? qs : (source.system?.qs || 1);
+const isCriticalCook = source.flags?.dsa5?.CriticalCook;
 
 const applyBreadEffect = async (ignoreGear, ignoreArmor, shortName) => {
     const changes = [];
@@ -52,11 +53,12 @@ const applyBreadEffect = async (ignoreGear, ignoreArmor, shortName) => {
     return { msg: dict.effectApplied(actor.name, shortName) };
 };
 
-if (currentQs <= 3) {
-    return await applyBreadEffect(true, false, dict.btnGear);
-} else if (currentQs >= 6) {
-    return await applyBreadEffect(true, true, `${dict.btnGear} & ${dict.btnArmor}`);
-} else {
+if (isCriticalCook) {
+    await applyBreadEffect(true, false, dict.btnGear);
+    await applyBreadEffect(true, true, `${dict.btnGear} & ${dict.btnArmor}`);
+}
+
+if (isCriticalCook || currentQs === 4 || currentQs === 5) {
     return new Promise((resolve) => {
         new Dialog({
             title: source.name,
@@ -75,4 +77,8 @@ if (currentQs <= 3) {
             close: () => resolve({ msg: dict.cancel })
         }).render(true);
     });
+} else if (currentQs <= 3) {
+    return await applyBreadEffect(true, false, dict.btnGear);
+} else {
+    return await applyBreadEffect(true, true, `${dict.btnGear} & ${dict.btnArmor}`);
 }
