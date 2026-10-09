@@ -9,8 +9,8 @@ function injectEffortModifier(targetDialog, value, tooltip, displayLabel) {
     let modifierContainer = parentElement.querySelector('.modifiers');
 
     if (!modifierContainer) {
-        const systemLabel = game.i18n.localize("DIALOG.SituationalModifiers");
-        const finalLabel = game.i18n.localize("DIALOG.SituationalModifiers");
+        const systemLabel = _loc("DIALOG.SituationalModifiers");
+        const finalLabel = _loc("DIALOG.SituationalModifiers");
 
         const fieldHtml = `
             <div class="modifiers form-group" style="flex-grow: 1;">
@@ -58,10 +58,10 @@ Hooks.on('dsa5.getRollDialogContextOptions', (dialogState, menuItems) => {
     if (source?.type !== "skill") return;
     if (!actor) return; 
 
-    const featName = game.i18n.localize("LocalizedIDs.featOfStrength");
+    const featName = _loc("LocalizedIDs.featOfStrength");
     if (source.name !== featName) return;
 
-    const sfName = game.i18n.localize("FEAT_EFFORT.menuLabel");
+    const sfName = _loc("FEAT_EFFORT.menuLabel");
     const hasEffortSF = actor.items.find(x => x.type === "specialability" && x.name === sfName);
 
     if (!hasEffortSF) return; 
@@ -72,14 +72,14 @@ Hooks.on('dsa5.getRollDialogContextOptions', (dialogState, menuItems) => {
         name: sfName,
         icon: '<i class="fa-solid fa-weight-hanging margin-right"></i>',
         callback: async () => {
-            const modifierLabel = game.i18n.localize("FEAT_EFFORT.modifierLabel");
+            const modifierLabel = _loc("FEAT_EFFORT.modifierLabel");
             
             if (checkEffortModifierApplied(parentDialog.element, modifierLabel)) {
-                ui.notifications.warn(game.i18n.localize("FEAT_EFFORT.alreadyApplied"));
+                ui.notifications.warn(_loc("FEAT_EFFORT.alreadyApplied"));
                 return;
             }
 
-            const tooltip = game.i18n.localize("FEAT_EFFORT.tooltip");
+            const tooltip = _loc("FEAT_EFFORT.tooltip");
             injectEffortModifier(parentDialog, "4", tooltip, `${modifierLabel} [4]`);
         }
     });
@@ -91,10 +91,10 @@ Hooks.on("postProcessDSARoll", async (chatOptions, testData, rerenderMessage, hi
 
     if (preData.source?.type !== "skill") return;
 
-    const featName = game.i18n.localize("LocalizedIDs.featOfStrength");
+    const featName = _loc("LocalizedIDs.featOfStrength");
     if (preData.source.name !== featName) return;
 
-    const modifierLabel = game.i18n.localize("FEAT_EFFORT.modifierLabel");
+    const modifierLabel = _loc("FEAT_EFFORT.modifierLabel");
 
     const hasModifier = preData.situationalModifiers?.some(mod => 
         mod.name?.includes(modifierLabel)
@@ -110,7 +110,7 @@ Hooks.on("postProcessDSARoll", async (chatOptions, testData, rerenderMessage, hi
 
         if (actor) {
             await actor.addCondition("stunned");
-            ui.notifications.info(game.i18n.format("FEAT_EFFORT.stunAdded", { name: actor.name }));
+            ui.notifications.info(_loc("FEAT_EFFORT.stunAdded", { name: actor.name }));
         }
     }
 });

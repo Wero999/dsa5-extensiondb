@@ -9,7 +9,7 @@ function injectSupportingModifier(targetDialog, value, tooltip, displayLabel) {
     let modifierContainer = parentElement.querySelector('.modifiers');
 
     if (!modifierContainer) {
-        const finalLabel = game.i18n.localize("situationalModifiers") === "situationalModifiers" ? "Bedingte Modifikatoren" : game.i18n.localize("situationalModifiers");
+        const finalLabel = _loc("situationalModifiers") === "situationalModifiers" ? "Bedingte Modifikatoren" : _loc("situationalModifiers");
 
         const fieldHtml = `
             <div class="modifiers form-group" style="flex-grow: 1;">
@@ -115,7 +115,7 @@ class SupportingTestApp extends ApplicationV2 {
     }
 
     get title() {
-        return game.i18n.localize("SUPPORTING_TEST.title");
+        return _loc("SUPPORTING_TEST.title");
     }
 
     async _renderHTML(context, options) {
@@ -131,11 +131,11 @@ class SupportingTestApp extends ApplicationV2 {
         const prepare = (l) => l.map(i => ({ id: i.id || i._id, name: i.name })).sort((a, b) => a.name.localeCompare(b.name));
         const talents = this.dsaActor.items.filter(i => i.type === "skill");
         
-        const body = { id: "body", label: game.i18n.localize("SKILL.body"), active: this.activeTab === "body", talents: prepare(talents.filter(i => i.system.group?.value === "body")) };
-        const social = { id: "social", label: game.i18n.localize("SKILL.social"), active: this.activeTab === "social", talents: prepare(talents.filter(i => i.system.group?.value === "social")) };
-        const nature = { id: "nature", label: game.i18n.localize("SKILL.nature"), active: this.activeTab === "nature", talents: prepare(talents.filter(i => i.system.group?.value === "nature")) };
-        const knowledge = { id: "knowledge", label: game.i18n.localize("SKILL.knowledge"), active: this.activeTab === "knowledge", talents: prepare(talents.filter(i => i.system.group?.value === "knowledge")) };
-        const trade = { id: "trade", label: game.i18n.localize("SKILL.trade"), active: this.activeTab === "trade", talents: prepare(talents.filter(i => i.system.group?.value === "trade")) };
+        const body = { id: "body", label: _loc("SKILL.body"), active: this.activeTab === "body", talents: prepare(talents.filter(i => i.system.group?.value === "body")) };
+        const social = { id: "social", label: _loc("SKILL.social"), active: this.activeTab === "social", talents: prepare(talents.filter(i => i.system.group?.value === "social")) };
+        const nature = { id: "nature", label: _loc("SKILL.nature"), active: this.activeTab === "nature", talents: prepare(talents.filter(i => i.system.group?.value === "nature")) };
+        const knowledge = { id: "knowledge", label: _loc("SKILL.knowledge"), active: this.activeTab === "knowledge", talents: prepare(talents.filter(i => i.system.group?.value === "knowledge")) };
+        const trade = { id: "trade", label: _loc("SKILL.trade"), active: this.activeTab === "trade", talents: prepare(talents.filter(i => i.system.group?.value === "trade")) };
         
         return {
             topGroups: [body, social, nature],
@@ -155,10 +155,10 @@ class SupportingTestApp extends ApplicationV2 {
         
         Hooks.once("postProcessDSARoll", (chatOptions, rollData) => {
             if (rollData.successLevel > 0) {
-                const label = game.i18n.localize("SUPPORTING_TEST.modifierLabel");
+                const label = _loc("SUPPORTING_TEST.modifierLabel");
                 const tt = `${label}<br>Modifikator: 1<br>Quelle: Unterstützung`;
                 injectSupportingModifier(this.parentDialog, "1", tt, `${label} [1]`);
-                ui.notifications.info(game.i18n.localize("SUPPORTING_TEST.successSuccess"));
+                ui.notifications.info(_loc("SUPPORTING_TEST.successSuccess"));
             }
         });
 
@@ -177,13 +177,13 @@ Hooks.on('dsa5.getRollDialogContextOptions', (dialogState, menuItems) => {
     const parentDialog = dialog;
 
     menuItems.push({
-        name: game.i18n.localize("SUPPORTING_TEST.menuLabel"),
+        name: _loc("SUPPORTING_TEST.menuLabel"),
         icon: '<i class="fas fa-hands-helping"></i>',
         callback: async () => {
-            const modifierLabel = game.i18n.localize("SUPPORTING_TEST.modifierLabel");
+            const modifierLabel = _loc("SUPPORTING_TEST.modifierLabel");
             
             if (checkModifierApplied(parentDialog.element, modifierLabel)) {
-                ui.notifications.warn(game.i18n.localize("SUPPORTING_TEST.alreadyApplied"));
+                ui.notifications.warn(_loc("SUPPORTING_TEST.alreadyApplied"));
                 return;
             }
 

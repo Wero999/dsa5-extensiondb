@@ -38,7 +38,7 @@ class MagicalAlchemistApp extends ApplicationV2 {
     }
 
     get title() {
-        return game.i18n.localize("MAGICAL_ALCHEMIST.alchemistName");
+        return _loc("MAGICAL_ALCHEMIST.alchemistName");
     }
 
     async _renderHTML(context, options) {
@@ -84,13 +84,13 @@ class MagicalAlchemistApp extends ApplicationV2 {
                 currentValue: currentVal,
                 attr: this.chars[i].toLowerCase(),
                 cssClass: currentVal <= target ? "suc" : "fail",
-                tooltip: `${game.i18n.localize("CHAR." + this.chars[i].toUpperCase())} vs ${target}`,
+                tooltip: `${_loc("CHAR." + this.chars[i].toUpperCase())} vs ${target}`,
                 selected: this.activeTab === 'reroll' && this.selectedForReroll.has(i)
             };
         });
 
         return {
-            description: game.i18n.localize("MAGICAL_ALCHEMIST.descriptionAlchemist"),
+            description: _loc("MAGICAL_ALCHEMIST.descriptionAlchemist"),
             activeTab: this.activeTab,
             isRerollTab: this.activeTab === 'reroll',
             isImproveTab: this.activeTab === 'improve',
@@ -164,7 +164,7 @@ class MagicalAlchemistApp extends ApplicationV2 {
         }
 
         if (this.dsaActor.system.status.astralenergy.value < cost) {
-            return ui.notifications.warn(game.i18n.localize("MAGICAL_ALCHEMIST.notEnoughAsP"));
+            return ui.notifications.warn(_loc("MAGICAL_ALCHEMIST.notEnoughAsP"));
         }
         
         await this.dsaActor.update({"system.status.astralenergy.value": this.dsaActor.system.status.astralenergy.value - cost});
@@ -195,7 +195,7 @@ class MagicalAlchemistApp extends ApplicationV2 {
         } else if (this.activeTab === 'addFP') {
             if (!data.preData.situationalModifiers) data.preData.situationalModifiers = [];
             data.preData.situationalModifiers.push({ 
-                name: game.i18n.localize("MAGICAL_ALCHEMIST.addFP"), 
+                name: _loc("MAGICAL_ALCHEMIST.addFP"), 
                 value: this.addedFP, 
                 type: "FP" 
             });
@@ -233,18 +233,18 @@ export default class MagicalAlchemistDSA5 {
     static async _rescueBotch(message, actor) {
         const cost = 10;
         if (actor.system.status.astralenergy.value < cost) {
-            return ui.notifications.warn(game.i18n.localize("MAGICAL_ALCHEMIST.notEnoughAsP"));
+            return ui.notifications.warn(_loc("MAGICAL_ALCHEMIST.notEnoughAsP"));
         }
         
         const confirmed = await DialogV2.confirm({
-            window: { title: game.i18n.localize("MAGICAL_ALCHEMIST.alchemistName") },
-            content: `<p>${game.i18n.localize("MAGICAL_ALCHEMIST.botchRescue")}</p>`,
+            window: { title: _loc("MAGICAL_ALCHEMIST.alchemistName") },
+            content: `<p>${_loc("MAGICAL_ALCHEMIST.botchRescue")}</p>`,
             modal: true
         });
 
         if (confirmed) {
             await actor.update({"system.status.astralenergy.value": actor.system.status.astralenergy.value - cost});
-            const failureLabel = game.i18n.localize("Failure");
+            const failureLabel = _loc("Failure");
             const updateData = {
                 "flags.data.postData.successLevel": -1,
                 "flags.data.postData.description": failureLabel,

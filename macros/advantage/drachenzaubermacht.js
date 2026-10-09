@@ -40,7 +40,7 @@ const skill = actor.items.find(i => i.type === "skill" && i.name === dict.skillN
 
 if (!skill) return ui.notifications.warn(dict.skillNotFound);
 
-actor.setupSkill(skill, { subtitle: ` (${game.i18n.localize('TYPES.Item.specialability')})` }, actor.sheet.getTokenId()).then(async (setupData) => {
+actor.setupSkill(skill, { subtitle: ` (${_loc('TYPES.Item.specialability')})` }, actor.sheet.getTokenId()).then(async (setupData) => {
   const res = await actor.basicTest(setupData);
 
   const availableQs = res.result.qualityStep || 0;

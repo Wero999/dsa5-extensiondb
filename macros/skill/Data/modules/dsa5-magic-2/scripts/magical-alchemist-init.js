@@ -25,7 +25,7 @@ Hooks.on('getChatMessageContextOptions', (app, options, c) => {
             if (!data || data.postData?.rollType !== 'talent' || message.flags.dsa5?.magicalAlchemistUsed) return false;
 
             const talentName = data.preData?.source?.name;
-            const localizedAlchemyName = game.i18n.localize("LocalizedIDs.alchemy");
+            const localizedAlchemyName = _loc("LocalizedIDs.alchemy");
             
             if (talentName !== localizedAlchemyName) return false;
             
@@ -35,7 +35,7 @@ Hooks.on('getChatMessageContextOptions', (app, options, c) => {
             const actor = DSA5_Utility.getSpeaker(message.speaker) || getActorFromMessage(message);
             if (!actor) return false;
             
-            const traditionName = game.i18n.localize("MAGICAL_ALCHEMIST.tradition");
+            const traditionName = _loc("MAGICAL_ALCHEMIST.tradition");
 
             return actor.items.some(i => 
                 i.type === "specialability" && 

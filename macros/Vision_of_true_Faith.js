@@ -14,7 +14,7 @@ Hooks.on('dsa5.getRollDialogContextOptions', (dialogState, menuItems) => {
     if (!actor) return;
 
     const effectNameKey = "VISION_FAITH.name";
-    const effectName = game.i18n.localize(effectNameKey);
+    const effectName = _loc(effectNameKey);
     const hasAbility = actor.items.find(i => i.type === "specialability" && i.name === effectName);
     
     if (!hasAbility) return;
@@ -32,7 +32,7 @@ async function runVisionOfTrueFaith(actor, dialog) {
     const currentFate = foundry.utils.getProperty(actor.system, "status.fatePoints.value") ?? 0;
     
     if (currentFate <= 0) {
-        ui.notifications.warn(game.i18n.format("VISION_FAITH.noFate", { name: actor.name }));
+        ui.notifications.warn(_loc("VISION_FAITH.noFate", { name: actor.name }));
         return;
     }
 
@@ -41,14 +41,14 @@ async function runVisionOfTrueFaith(actor, dialog) {
     if (rollButton) {
         rollButton.click();
     } else {
-        ui.notifications.warn(game.i18n.localize("VISION_FAITH.autoRollFailed"));
+        ui.notifications.warn(_loc("VISION_FAITH.autoRollFailed"));
     }
 
-    const skillName = game.i18n.localize("VISION_FAITH.skillName");
+    const skillName = _loc("VISION_FAITH.skillName");
     const skill = actor.items.find(i => i.type === "skill" && i.name === skillName);
     
     if (!skill) {
-        ui.notifications.error(game.i18n.format("VISION_FAITH.noSkill", { name: actor.name }));
+        ui.notifications.error(_loc("VISION_FAITH.noSkill", { name: actor.name }));
         return;
     }
 
@@ -74,14 +74,14 @@ async function runVisionOfTrueFaith(actor, dialog) {
         if (qs >= 6) skBonus += 1;
 
         const effectData = {
-            name: game.i18n.localize("VISION_FAITH.name"),
+            name: _loc("VISION_FAITH.name"),
             icon: "icons/svg/aura.svg",
             origin: actor.uuid,
             duration: { seconds: 12 * 3600 },
             changes: []
         };
 
-        const willpowerLabel = game.i18n.localize("VISION_FAITH.willpowerLabel");
+        const willpowerLabel = _loc("VISION_FAITH.willpowerLabel");
 
         if (willpowerBonus > 0) {
             effectData.changes.push({
@@ -102,12 +102,12 @@ async function runVisionOfTrueFaith(actor, dialog) {
         if (effectData.changes.length > 0) {
             await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
             ui.notifications.info(
-                game.i18n.format("VISION_FAITH.gained", { name: actor.name, wp: willpowerBonus, sk: skBonus })
+                _loc("VISION_FAITH.gained", { name: actor.name, wp: willpowerBonus, sk: skBonus })
             );
         } else {
-            ui.notifications.info(game.i18n.format("VISION_FAITH.noBonus", { qs: qs, name: actor.name }));
+            ui.notifications.info(_loc("VISION_FAITH.noBonus", { qs: qs, name: actor.name }));
         }
     } else {
-        ui.notifications.warn(game.i18n.format("VISION_FAITH.testFailed", { name: actor.name }));
+        ui.notifications.warn(_loc("VISION_FAITH.testFailed", { name: actor.name }));
     }
 }

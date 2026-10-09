@@ -9,7 +9,7 @@ function injectSituationalModifierField(targetDialog, value, tooltip, displayLab
     let modifierContainer = parentElement.querySelector('.modifiers');
 
     if (!modifierContainer) {
-        const localizedLabel = game.i18n.localize("situationalModifiers");
+        const localizedLabel = _loc("situationalModifiers");
         const finalLabel = (localizedLabel === "situationalModifiers") ? "Bedingte Modifikatoren" : localizedLabel;
 
         const fieldHtml = `
@@ -122,7 +122,7 @@ class PracticalApplicationApp extends ApplicationV2 {
     }
 
     get title() {
-        return game.i18n.localize("LOCAL.PraxisbezugTitle");
+        return _loc("LOCAL.PraxisbezugTitle");
     }
 
     async _renderHTML(context, options) {
@@ -141,14 +141,14 @@ class PracticalApplicationApp extends ApplicationV2 {
             
             const distribution = attrs.map((attr, idx) => ({
                 idx: idx,
-                label: game.i18n.localize(`CHARAbbrev.${attr.toUpperCase()}`),
+                label: _loc(`CHARAbbrev.${attr.toUpperCase()}`),
                 value: this.distributionData[idx]
             }));
 
             return {
                 rolled: true,
                 qs: this.qs,
-                instruction: game.i18n.format("LOCAL.PraxisbezugInstruction", {qs: this.qs}),
+                instruction: _loc("LOCAL.PraxisbezugInstruction", {qs: this.qs}),
                 distribution: distribution
             };
         } else {
@@ -158,7 +158,7 @@ class PracticalApplicationApp extends ApplicationV2 {
             
             return {
                 rolled: false,
-                description: game.i18n.localize("LOCAL.PraxisbezugDescription"),
+                description: _loc("LOCAL.PraxisbezugDescription"),
                 skills: skills.map(s => ({ id: s.id, name: s.name }))
             };
         }
@@ -210,14 +210,14 @@ Hooks.on('dsa5.getRollDialogContextOptions', (dialogState, menuItems) => {
     if (!source) return;
     if (source.system?.group?.value === 'knowledge' || source.type !== "skill") return;
     
-    const sfName = game.i18n.localize('LOCAL.praxisbezugAbility');
+    const sfName = _loc('LOCAL.praxisbezugAbility');
     if (actor.items.some(i => i.type === "specialability" && i.name.includes(sfName))) {
         menuItems.push({
             name: sfName,
             icon: '<i class="fas fa-lightbulb"></i>',
             callback: () => {
                 if (checkPraxisApplied(dialog.element)) {
-                    ui.notifications.warn(game.i18n.localize("LOCAL.PraxisbezugAlreadyApplied"));
+                    ui.notifications.warn(_loc("LOCAL.PraxisbezugAlreadyApplied"));
                     return;
                 }
                 new PracticalApplicationApp(actor, dialog, testData).render(true);

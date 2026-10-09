@@ -7,7 +7,7 @@ const dict = {
     noActor: "Konnte den ausfuehrenden Charakter nicht finden.",
     onlySingleTarget: "Bitte genau ein Ziel anvisieren.",
     targetNoActor: "Das Ziel ist kein Akteur.",
-    notEnoughAsp: (current, required) => `${game.i18n.localize("DSAError.NotEnoughAsP")} (Gefunden: ${current} AsP, Benoetigt: ${required} AsP)`,
+    notEnoughAsp: (current, required) => `${_loc("DSAError.NotEnoughAsP")} (Gefunden: ${current} AsP, Benoetigt: ${required} AsP)`,
     traditionName: "Tradition (Hexen)",
     eyesGlow: (name) => `Die Augen von ${name} leuchten kurz purpurn auf.`,
     nothingHappens: "Nichts passiert."
@@ -16,7 +16,7 @@ const dict = {
     noActor: "Could not find the executing character.",
     onlySingleTarget: "Please target exactly one target.",
     targetNoActor: "The target is not an actor.",
-    notEnoughAsp: (current, required) => `${game.i18n.localize("DSAError.NotEnoughAsP")} (Found: ${current} AsP, Required: ${required} AsP)`,
+    notEnoughAsp: (current, required) => `${_loc("DSAError.NotEnoughAsP")} (Found: ${current} AsP, Required: ${required} AsP)`,
     traditionName: "Tradition (Witch)",
     eyesGlow: (name) => `The eyes of ${name} glow briefly purple.`,
     nothingHappens: "Nothing happens."

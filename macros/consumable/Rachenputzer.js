@@ -114,7 +114,7 @@ setupData.testData.targets = [target.id];
 const defenseMalus = qualityStep === 6 ? -2 : 0;
 if (Array.isArray(setupData.testData.situationalModifiers)) {
   setupData.testData.situationalModifiers.push({
-    name: game.i18n.localize("MODS.defenseMalus"),
+    name: _loc("MODS.defenseMalus"),
     value: defenseMalus,
     type: "defenseMalus",
     selected: true,

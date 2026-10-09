@@ -21,7 +21,7 @@ const dict = {
     qsInvalid: "Qualitätsstufe (QS) fehlt oder ist ungültig (1-6).",
     noToken: "Kein aktives Token des Auslösers gefunden.",
     noItemClass: "Die DSA5-Itemklasse ist nicht verfügbar.",
-    burning: game.i18n.localize("CONDITION.burning"),
+    burning: _loc("CONDITION.burning"),
     transferBlocked: (roll, gate) => `Das Hylailer Feuer zündet nicht (${roll} auf 1W6, Zündung bei 1-${gate}).`,
     transferSuccess: (roll, gate, rounds) => `Das Hylailer Feuer zündet (${roll} auf 1W6, Zündung bei 1-${gate}) und brennt ${rounds} KR.`,
     tickMsg: "Hylailer Feuer breitet sich aus (Brennend +1).",
@@ -40,7 +40,7 @@ const dict = {
     qsInvalid: "Quality level (QL) missing or invalid (1-6).",
     noToken: "No active token of the source actor found.",
     noItemClass: "The DSA5 item class is not available.",
-    burning: game.i18n.localize("CONDITION.burning"),
+    burning: _loc("CONDITION.burning"),
     transferBlocked: (roll, gate) => `The Hylailic Fire does not ignite (${roll} on 1d6, ignition on 1-${gate}).`,
     transferSuccess: (roll, gate, rounds) => `The Hylailic Fire ignites (${roll} on 1d6, ignition on 1-${gate}) and burns for ${rounds} combat rounds.`,
     tickMsg: "Hylailic Fire spreads (Burning +1).",
@@ -55,7 +55,7 @@ const dict = {
 }[lang];
 
 const localizedId = (key, fallback) => {
-  const localized = game.i18n.localize(key);
+  const localized = _loc(key);
   return localized == key ? fallback : localized;
 };
 const combatSkill = localizedId("LocalizedIDs.Throwing Weapons", lang == "de" ? "Wurfwaffen" : "Throwing Weapons");

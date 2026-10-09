@@ -122,8 +122,8 @@ if (!succeeded) {
 
 const actorName = actor.name ?? (lang === "de" ? "der Charakter" : "the character");
 
-const lepLabel = game.i18n.localize("LEP") || "Lebenspunkte";
-const aspLabel = game.i18n.localize("ASP") || "Astralpunkte";
+const lepLabel = _loc("LEP") || "Lebenspunkte";
+const aspLabel = _loc("ASP") || "Astralpunkte";
 
 const currentLP = Number(gp(actor, LP_PATH)) || 0;
 const maxLP = Number(gp(actor, LP_MAX_PATH)) || 0;

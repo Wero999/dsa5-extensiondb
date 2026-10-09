@@ -14,7 +14,7 @@ Hooks.on('dsa5.getRollDialogContextOptions', (dialogState, menuItems) => {
     if (!actor) return;
 
     const effectNameKey = "VISION_DEITY.name";
-    const effectName = game.i18n.localize(effectNameKey);
+    const effectName = _loc(effectNameKey);
     const hasAbility = actor.items.find(i => i.type === "specialability" && i.name === effectName);
     
     if (!hasAbility) return;
@@ -32,7 +32,7 @@ async function runVisionOfTheDeity(actor, dialog) {
     const currentFate = foundry.utils.getProperty(actor.system, "status.fatePoints.value") ?? 0;
     
     if (currentFate <= 0) {
-        ui.notifications.warn(game.i18n.format("VISION_DEITY.noFate", { name: actor.name }));
+        ui.notifications.warn(_loc("VISION_DEITY.noFate", { name: actor.name }));
         return;
     }
 
@@ -44,11 +44,11 @@ async function runVisionOfTheDeity(actor, dialog) {
         ui.notifications.warn("Konnte die Regenerationsprobe nicht automatisch auslösen.");
     }
 
-    const skillName = game.i18n.localize("VISION_DEITY.skillName");
+    const skillName = _loc("VISION_DEITY.skillName");
     const skill = actor.items.find(i => i.type === "skill" && i.name === skillName);
     
     if (!skill) {
-        ui.notifications.error(game.i18n.format("VISION_DEITY.noSkill", { name: actor.name }));
+        ui.notifications.error(_loc("VISION_DEITY.noSkill", { name: actor.name }));
         return;
     }
 
@@ -65,7 +65,7 @@ async function runVisionOfTheDeity(actor, dialog) {
         const charges = Math.ceil(qs / 2);
         
         const effectData = {
-            name: game.i18n.localize("VISION_DEITY.name"),
+            name: _loc("VISION_DEITY.name"),
             icon: "icons/svg/aura.svg",
             origin: actor.uuid,
             changes: [
@@ -84,9 +84,9 @@ async function runVisionOfTheDeity(actor, dialog) {
 
         await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
         ui.notifications.info(
-            game.i18n.format("VISION_DEITY.gained", { anzahl: charges })
+            _loc("VISION_DEITY.gained", { anzahl: charges })
         );
     } else {
-        ui.notifications.warn(game.i18n.format("VISION_DEITY.testFailed", { name: actor.name }));
+        ui.notifications.warn(_loc("VISION_DEITY.testFailed", { name: actor.name }));
     }
 }

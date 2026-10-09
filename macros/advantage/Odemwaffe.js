@@ -146,7 +146,7 @@ const setupData = await game.dsa5.entities.Itemdsa5.getSubClass(weapon.type).set
 
 // Modifikator zum Ausweichen
 setupData.testData.situationalModifiers.push({
-  name: game.i18n.localize(T("defenseMalus")),
+  name: _loc(T("defenseMalus")),
   value: -4,
   type: "defenseMalus",
   selected: true,
