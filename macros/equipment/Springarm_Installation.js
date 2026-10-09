@@ -4,7 +4,7 @@ const lang = game.i18n.lang === "de" ? "de" : "en";
 
 const dict = {
     de: {
-        title: "Item konfigurieren",
+        title: "Springarm konfigurieren",
         desc: "Dieses Item kann eine Waffe der Kampftechnik Dolche aufnehmen.",
         noDaggers: "Du hast keine (freien) Dolche im Inventar.",
         mainHand: "Haupthand",
@@ -19,8 +19,8 @@ const dict = {
         combatSkill: "Dolche"
     },
     en: {
-        title: "Configure Item",
-        desc: "This item can hold a weapon of the Daggers combat technique.",
+        title: "Configure spring mechanism",
+        desc: "This spring mechanism can hold a weapon of the Daggers combat technique.",
         noDaggers: "You have no (unequipped/free) daggers in your inventory.",
         mainHand: "Main Hand",
         offHand: "Off Hand",
