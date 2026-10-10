@@ -2,7 +2,7 @@ const lang = game.i18n.lang === 'de' ? 'de' : 'en';
 
 const dict = {
   de: {
-    dialogContent: "Welche Wirkung wählen?",
+    dialogContent: "Wähle die Wirkung:",
     btnQs1: "Kälte verzögert",
     btnQs4: "Unterkühlung -1",
     btnQs6: "Kälteresistenz",
