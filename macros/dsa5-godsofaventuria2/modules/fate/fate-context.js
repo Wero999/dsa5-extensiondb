@@ -65,6 +65,105 @@ export function extractDamageDice(damageRollData, selectedIndices = new Set()) {
     return damageDice;
 }
 
+function extractD20Dice(app, preData, postData) {
+    const type = preData.source?.type;
+    const mode = preData.mode;
+    const isCombatRoll = ['meleeweapon', 'rangeweapon', 'dodge', 'trait'].includes(type) || ['attack', 'parry', 'range'].includes(mode);
+    const sheetTab = app.tabGroups.sheet || '';
+
+    return (postData.characteristics || [])
+        .filter((item) => item.char !== 'damage')
+        .map((item, i) => {
+            const attr = isCombatRoll ? (type === 'dodge' ? 'dodge' : (mode || type)) : (item.char || 'd20');
+            const rerollSelected = app.selectedForReroll.has(i);
+            return {
+                index: i,
+                currentValue: item.res,
+                attr,
+                cssClass: item.suc ? 'suc' : 'fail',
+                tooltip: item.tar ? `${_loc(item.char === 'attack' ? 'Attack' : item.char === 'parry' ? 'Parry' : `CHAR.${item.char.toUpperCase()}`)} vs ${item.tar}` : '',
+                rerollSelected,
+                selected: (sheetTab === 'reroll' || sheetTab === 'meisterschicksal' || sheetTab === 'xeledon_reroll') ? rerollSelected : app.selectedForImprove === i,
+                specialSelected: sheetTab.startsWith('specialAction') ? app.selectedForSpecialReroll === i : false,
+            };
+        });
+}
+
+// --- Xeledon Helper ---
+
+export function hasAvailableXeledonSchip(actor) {
+    return (Number(foundry.utils.getProperty(actor, 'flags.dsa5.specialPoints.Xeledon.current')) || 0) > 0;
+}
+
+export function getAvailableXeledonOptions(message, { isSpeakerOwner = false } = {}) {
+    const data = message?.flags?.data;
+    const preData = data?.preData;
+    const postData = data?.postData;
+    if (!preData || !postData) return [];
+
+    if ((data.fateSpecialUsed || []).includes('Xeledon')) return [];
+
+    const type = preData.source?.type;
+    const mode = preData.mode;
+    if ((postData.rollType || type) === 'regenerate') return [];
+
+    const isCombatRoll = ['meleeweapon', 'rangeweapon', 'dodge', 'trait'].includes(type) || ['attack', 'parry', 'range'].includes(mode);
+    const hasD20Roll = !!postData.characteristics || !!preData.roll;
+    const hasDamageRoll = !!postData.damageRoll;
+    const canSeeDamage = data.hideDamage !== true || isSpeakerOwner || game.user.isGM;
+    const successLevel = postData.successLevel || 0;
+
+    const options = [];
+    if (hasD20Roll && !data.fatePointRerollUsed) options.push('reroll');
+    if (hasDamageRoll && canSeeDamage && !data.fatePointDamageRerollUsed) options.push('rerollDamage');
+    if (successLevel > 0 && !data.fatePointAddQSUsed && Number(postData.qualityStep) > 1 && !isCombatRoll) options.push('addQS');
+
+    return options;
+}
+
+export function getXeledonCandidateActors(message) {
+    const speakerActor = ChatMessage.getSpeakerActor(message?.speaker);
+    const isSpeakerOwner = !!speakerActor?.isOwner;
+    if (!getAvailableXeledonOptions(message, { isSpeakerOwner }).length) return [];
+
+    const playerAssignedIds = new Set(
+        game.users.filter((u) => !u.isGM && u.character).map((u) => u.character.id),
+    );
+
+    return game.actors.filter((actor) => {
+        if (!hasAvailableXeledonSchip(actor)) return false;
+        if (game.user.isGM) return actor.hasPlayerOwner || playerAssignedIds.has(actor.id);
+        return actor.isOwner;
+    });
+}
+
+export function getRollCardSwitchActors(message, speakerActor) {
+    const candidates = getXeledonCandidateActors(message);
+    const externalXeledon = candidates.filter((a) => a.uuid !== speakerActor?.uuid);
+
+    if (game.user.isGM || speakerActor?.isOwner) {
+        if (!externalXeledon.length) return [];
+        return speakerActor ? [speakerActor, ...externalXeledon] : externalXeledon;
+    }
+
+    return externalXeledon;
+}
+
+function buildXeledonTabEntries(options, activeTab) {
+    const xeledonTabs = {};
+    const list = [];
+    for (const opt of options) {
+        const id = `xeledon_${opt}`;
+        const label = `${_loc(FATE_TAB_LABELS[opt])} (Xeledon)`;
+        const tab = createTab(id, activeTab, label);
+        xeledonTabs[opt] = tab;
+        list.push(tab);
+    }
+    return { xeledonTabs, list };
+}
+
+// --- Roll-Request (Mada / Travia) Helper ---
+
 export function getRollRequestActors(message) {
     const req = message?.flags?.dsa5?.rollRequest;
     if (!req) return [];
@@ -118,6 +217,86 @@ export function getRegenBlessingActors(message) {
     );
 }
 
+// --- Context Builder ---
+
+export function buildActorPickerFateContext(app) {
+    const switchActors = getRollCardSwitchActors(app.message, app.targetActor);
+    return {
+        showActorHeader: true,
+        showFateBody: false,
+        actor: null,
+        availableActors: switchActors.map((a) => ({ id: a.id, name: a.name, img: a.img })),
+        canSwitchActor: true,
+        showActorSwitcher: true,
+        hasFateAction: false,
+        isGM: game.user.isGM,
+    };
+}
+
+export function buildExternalXeledonFateContext(app) {
+    const data = app.message.flags.data;
+    const switchActors = getRollCardSwitchActors(app.message, app.targetActor);
+    const options = getAvailableXeledonOptions(app.message, { isSpeakerOwner: !!app.targetActor?.isOwner });
+
+    app.selectedPool = 'special';
+    app.selectedSpecialKey = 'Xeledon';
+
+    const { xeledonTabs, list } = buildXeledonTabEntries(options, app.tabGroups.sheet);
+    const tabsDef = {};
+    for (const tab of list) tabsDef[tab.id] = tab;
+
+    if (list.length && !tabsDef[app.tabGroups.sheet]) {
+        const first = list[0];
+        app.tabGroups.sheet = first.id;
+        first.cssClass = 'active';
+    } else if (!list.length) {
+        tabsDef.noOption = createTab('noOption', 'noOption');
+        app.tabGroups.sheet = 'noOption';
+    }
+
+    const sData = foundry.utils.getProperty(app.dsaActor, 'flags.dsa5.specialPoints.Xeledon');
+    const label = `${DSA5GodsMenuConfig.schipName('Xeledon')}-Schip`;
+    const imgStyle = `background-image: url('${DSA5GodsMenuConfig.chipIcon('Xeledon')}');`;
+    const specialSchips = sData?.value > 0
+        ? DSA5GodsMenuConfig.buildSchipDots(sData.value, sData.current || 0, (isFull) => ({
+            key: 'Xeledon',
+            tooltip: label,
+            imgStyle,
+            isRelevant: isFull && list.length > 0,
+            isSelected: true,
+            isGod: true,
+        }))
+        : [];
+
+    const dice = xeledonTabs.reroll ? extractD20Dice(app, data.preData, data.postData) : [];
+    const damageDice = xeledonTabs.rerollDamage
+        ? extractDamageDice(data.postData.damageRoll, app.selectedForDamageReroll)
+        : [];
+    const canSwitchActor = switchActors.length > 1;
+
+    return {
+        showActorHeader: canSwitchActor,
+        showFateBody: true,
+        actor: app.dsaActor,
+        availableActors: switchActors.map((a) => ({ id: a.id, name: a.name, img: a.img })),
+        canSwitchActor,
+        showActorSwitcher: canSwitchActor,
+        tabs: tabsDef,
+        activeSpecialTabs: [],
+        xeledonTabs,
+        dice,
+        damageDice,
+        specialImg: DSA5GodsMenuConfig.chipIcon(null),
+        activeTab: app.tabGroups.sheet,
+        specialSchips,
+        isSpecialPool: true,
+        hasSpecial: specialSchips.length > 0,
+        specialSchipDescription: DSA5GodsMenuConfig.schipDescription('Xeledon'),
+        hasFateAction: list.length > 0 && (sData?.current || 0) > 0,
+        isGM: game.user.isGM,
+    };
+}
+
 export function buildRollRequestFateContext(app) {
     const eligibleActors = getRegenBlessingActors(app.message);
     if (app.dsaActor && !eligibleActors.some((a) => a.id === app.dsaActor.id)) {
@@ -169,13 +348,14 @@ export function buildRollRequestFateContext(app) {
     const canSwitchActor = eligibleActors.length > 1;
 
     return {
-        isRollRequest: true,
+        showActorHeader: true,
         showFateBody: !!app.dsaActor,
         actor: app.dsaActor,
         availableActors: eligibleActors.map((a) => ({ id: a.id, name: a.name, img: a.img })),
         canSwitchActor,
         showActorSwitcher: canSwitchActor,
         tabs: tabsDef,
+        activeSpecialTabs: [],
         regenBlessingTabs,
         specialImg: DSA5GodsMenuConfig.chipIcon(null),
         activeTab: app.tabGroups.sheet,
@@ -230,8 +410,9 @@ export async function buildUnifiedFateContext(app, baseContext) {
     if (hasD20Roll && canImprove && !data.fateImproved) tabsDef.improve = createTab('improve', app.tabGroups.sheet);
     if (canAddQS) tabsDef.addQS = createTab('addQS', app.tabGroups.sheet);
 
+    const isSpecialSubTab = (id) => id.startsWith('specialAction_') || id.startsWith('xeledon_');
     const currentTab = app.tabGroups.sheet || '';
-    if (!tabsDef[currentTab] && !currentTab.startsWith('specialAction_') && !MASTER_TAB_IDS.has(currentTab)) {
+    if (!tabsDef[currentTab] && !isSpecialSubTab(currentTab) && !MASTER_TAB_IDS.has(currentTab)) {
         const firstTab = Object.keys(tabsDef)[0];
         if (firstTab) {
             app.tabGroups.sheet = firstTab;
@@ -239,22 +420,7 @@ export async function buildUnifiedFateContext(app, baseContext) {
         }
     }
 
-    const sheetTab = app.tabGroups.sheet || '';
-    const dice = (postData.characteristics || [])
-        .filter((item) => item.char !== 'damage')
-        .map((item, i) => {
-            const attr = isCombatRoll ? (type === 'dodge' ? 'dodge' : (mode || type)) : (item.char || 'd20');
-            return {
-                index: i,
-                currentValue: item.res,
-                attr,
-                cssClass: item.suc ? 'suc' : 'fail',
-                tooltip: item.tar ? `${_loc(item.char === 'attack' ? 'Attack' : item.char === 'parry' ? 'Parry' : `CHAR.${item.char.toUpperCase()}`)} vs ${item.tar}` : '',
-                selected: (sheetTab === 'reroll' || sheetTab === 'meisterschicksal') ? app.selectedForReroll.has(i) : app.selectedForImprove === i,
-                specialSelected: sheetTab.startsWith('specialAction') ? app.selectedForSpecialReroll === i : false,
-            };
-        });
-
+    const dice = extractD20Dice(app, preData, postData);
     const damageDice = hasDamageRoll
         ? extractDamageDice(postData.damageRoll, app.selectedForDamageReroll)
         : [];
@@ -289,8 +455,12 @@ export async function buildUnifiedFateContext(app, baseContext) {
     const groupTooltip = _loc('FORMULA.groupFatePoints');
     const groupSchips = DSA5GodsMenuConfig.buildSchipDots(grpMax, grpCur, () => ({ tooltip: groupTooltip }));
 
+    const xeledonOptions = getAvailableXeledonOptions(app.message, { isSpeakerOwner: true });
+
     const specialSchips = [];
     let activeSpecialTab = null;
+    let activeSpecialTabs = [];
+    let xeledonTabs = {};
     let hasGodChips = false;
     let hasDemonChips = false;
 
@@ -300,7 +470,8 @@ export async function buildUnifiedFateContext(app, baseContext) {
             if ((sData?.value || 0) <= 0) continue;
 
             const isQsAndReroll = DSA5GodsMenuConfig.isQsAndReroll(key, rollName);
-            const isRelevant = isQsAndReroll || DSA5GodsMenuConfig.isExtraReroll(key, rollName);
+            const isXeledonRelevant = key === 'Xeledon' && xeledonOptions.length > 0;
+            const isRelevant = isQsAndReroll || DSA5GodsMenuConfig.isExtraReroll(key, rollName) || isXeledonRelevant;
             const isGod = DSA5GodsMenuConfig.isGod(key);
             if (isGod) hasGodChips = true;
             else hasDemonChips = true;
@@ -308,8 +479,15 @@ export async function buildUnifiedFateContext(app, baseContext) {
             const imgStyle = `background-image: url('${DSA5GodsMenuConfig.chipIcon(key)}');`;
             const label = `${DSA5GodsMenuConfig.schipName(key)}-Schip`;
 
-            if (isQsAndReroll && (sData.current || 0) > 0 && app.selectedPool === 'special' && app.selectedSpecialKey === key && !usedSpecialKeys.includes(key)) {
-                activeSpecialTab = createTab(`specialAction_${key}`, app.tabGroups.sheet, label);
+            if ((sData.current || 0) > 0 && app.selectedPool === 'special' && app.selectedSpecialKey === key && !usedSpecialKeys.includes(key)) {
+                if (isQsAndReroll) {
+                    activeSpecialTab = createTab(`specialAction_${key}`, app.tabGroups.sheet, label);
+                    activeSpecialTabs = [activeSpecialTab];
+                } else if (isXeledonRelevant) {
+                    const built = buildXeledonTabEntries(xeledonOptions, app.tabGroups.sheet);
+                    xeledonTabs = built.xeledonTabs;
+                    activeSpecialTabs = built.list;
+                }
             }
 
             specialSchips.push(...DSA5GodsMenuConfig.buildSchipDots(sData.value, sData.current || 0, (isFull) => ({
@@ -382,7 +560,12 @@ export async function buildUnifiedFateContext(app, baseContext) {
             tabsDef[firstMasterKey].cssClass = 'active';
         }
         activeSpecialTab = null;
-    } else if (!activeSpecialTab && ((app.tabGroups.sheet || '').startsWith('specialAction_') || MASTER_TAB_IDS.has(app.tabGroups.sheet))) {
+        activeSpecialTabs = [];
+        xeledonTabs = {};
+    } else if (
+        !activeSpecialTabs.some((t) => t.id === app.tabGroups.sheet)
+        && (isSpecialSubTab(app.tabGroups.sheet || '') || MASTER_TAB_IDS.has(app.tabGroups.sheet))
+    ) {
         const firstTab = Object.keys(tabsDef)[0];
         if (firstTab) {
             app.tabGroups.sheet = firstTab;
@@ -390,7 +573,7 @@ export async function buildUnifiedFateContext(app, baseContext) {
         }
     }
 
-    if (Object.keys(tabsDef).length === 0 && !activeSpecialTab) {
+    if (Object.keys(tabsDef).length === 0 && !activeSpecialTabs.length) {
         tabsDef.noOption = createTab('noOption', 'noOption');
         app.tabGroups.sheet = 'noOption';
     }
@@ -402,10 +585,12 @@ export async function buildUnifiedFateContext(app, baseContext) {
         }
     }
 
-    const hasFateAction = !!activeSpecialTab
-        || Object.keys(tabsDef).some((id) => id !== 'noOption' && id !== 'masterPlaceholder');
-
     const availablePoolsCount = [hasPersonal, hasGroupSchips, hasSpecialSchips, hasMaster].filter(Boolean).length;
+    const hasFateAction = availablePoolsCount > 0 && (
+        activeSpecialTabs.length > 0
+        || Object.keys(tabsDef).some((id) => id !== 'noOption' && id !== 'masterPlaceholder')
+    );
+
     const dynamicSpecialImg = (hasDemonChips && !hasGodChips)
         ? DSA5GodsMenuConfig.chipIcon(null, 'Erzdaemonen.webp')
         : DSA5GodsMenuConfig.chipIcon(null);
@@ -426,12 +611,22 @@ export async function buildUnifiedFateContext(app, baseContext) {
         masterCost = _loc('GodsMenu.FateTab.MasterFailedCostDetail', { type: attackType, cost: failCost });
     }
 
+    const switchActors = getRollCardSwitchActors(app.message, app.targetActor);
+    const showActorHeader = switchActors.length > 1;
+
     return {
         ...baseContext,
-        isRollRequest: false,
+        showActorHeader,
         showFateBody: true,
+        actor: app.dsaActor,
+        availableActors: switchActors.map((a) => ({ id: a.id, name: a.name, img: a.img })),
+        canSwitchActor: showActorHeader,
+        showActorSwitcher: showActorHeader,
         tabs: tabsDef,
         regenBlessingTabs: [],
+        activeSpecialTab,
+        activeSpecialTabs,
+        xeledonTabs,
         dice,
         damageDice,
         masterRegenDice,
@@ -444,7 +639,6 @@ export async function buildUnifiedFateContext(app, baseContext) {
         groupSchips,
         specialSchips,
         masterSchips,
-        activeSpecialTab,
         isPersonalPool: app.selectedPool === 'personal',
         isGroupPool: app.selectedPool === 'group',
         isSpecialPool: app.selectedPool === 'special',
