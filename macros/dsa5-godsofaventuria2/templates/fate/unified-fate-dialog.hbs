@@ -1,6 +1,6 @@
 <div class="unified-fate-dialog scrollable flexcol gap10px">
     <div class="fate-header flexcol center dsa-fate-header dsamb-4">
-        {{#if isRollRequest}}
+        {{#if showActorHeader}}
         {{> modules/dsa5-godsofaventuria2/templates/fate/header.hbs}}
         {{/if}}
 
@@ -70,9 +70,11 @@
     {{#if showFateBody}}
     {{> systems/dsa5/templates/system/dsatabs.hbs tabs=tabs}}
 
-    {{#if activeSpecialTab}}
+    {{#if activeSpecialTabs.length}}
     <nav class="sheet-tabs tabs dsa-fate-special-nav" data-group="sheet">
-        <a class="item {{activeSpecialTab.cssClass}}" data-tab="{{activeSpecialTab.id}}">{{activeSpecialTab.label}}</a>
+        {{#each activeSpecialTabs}}
+        <a class="item {{this.cssClass}}" data-tab="{{this.id}}">{{this.label}}</a>
+        {{/each}}
     </nav>
     {{/if}}
 
@@ -157,6 +159,47 @@
                             <span data-tooltip="{{this.tooltip}}" class="{{this.cssClass}} die-{{this.attr}} d20">{{this.currentValue}}</span>
                         </a>
                     {{/each}}
+                </div>
+            </div>
+        </section>
+        {{/if}}
+
+        {{#if xeledonTabs.reroll}}
+        <section class="tab {{xeledonTabs.reroll.cssClass}}" data-tab="xeledon_reroll" data-group="sheet">
+            <div class="dialog-content standard-form">
+                <h4 class="center">{{xeledonTabs.reroll.label}}</h4>
+                <div class="card-content hide-option roll-result center flexrow flexAlignCenter">
+                    {{#each dice}}
+                        <a class="dieButton {{#if this.rerollSelected}}dieSelected{{/if}}" data-action="toggleDie" data-index="{{this.index}}">
+                            <span data-tooltip="{{this.tooltip}}" class="{{this.cssClass}} die-{{this.attr}} d20">{{this.currentValue}}</span>
+                        </a>
+                    {{/each}}
+                </div>
+            </div>
+        </section>
+        {{/if}}
+
+        {{#if xeledonTabs.rerollDamage}}
+        <section class="tab {{xeledonTabs.rerollDamage.cssClass}}" data-tab="xeledon_rerollDamage" data-group="sheet">
+            <div class="dialog-content standard-form">
+                <h4 class="center">{{xeledonTabs.rerollDamage.label}}</h4>
+                <div class="card-content hide-option roll-result center flexrow flexAlignCenter dsamt-4">
+                    {{#each damageDice}}
+                        <a class="dieButton {{#if this.selected}}dieSelected{{/if}}" data-action="toggleDamageDie" data-index="{{this.index}}">
+                            <span data-tooltip="{{this.tooltip}}" class="display-toggle fail die-damage d{{this.faces}}">{{this.currentValue}}</span>
+                        </a>
+                    {{/each}}
+                </div>
+            </div>
+        </section>
+        {{/if}}
+
+        {{#if xeledonTabs.addQS}}
+        <section class="tab {{xeledonTabs.addQS.cssClass}}" data-tab="xeledon_addQS" data-group="sheet">
+            <div class="dialog-content standard-form">
+                <h4 class="center">{{xeledonTabs.addQS.label}}</h4>
+                <div class="description flexcol gap5px center dsa-info-box dsamt-4">
+                    <p>{{localize "GodsMenu.FateTab.XeledonSubQSDesc"}}</p>
                 </div>
             </div>
         </section>
