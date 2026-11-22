@@ -1,9 +1,9 @@
 import { DSA5GodsMenuConfig } from './config.js';
-import { promptSchipSwap, promptManualConditions, promptAvesCheat, promptAvesDamageReroll, promptSpecialRollCheat } from './fate-dialogs.js';
-import { getDemonConditionRemovals, applyDemonConditionRemovals, applyDemonSchipRegen } from './fate-effects.js';
-import { executeReroll, executeDamageReroll, executeAddQS, executeFieserSchaden, executeGescheitert, executeImprove, executeMasterRegen, prepareRegenBlessing, executeRegenBlessing, consumeSchip, processReroll, processDamageReroll } from './fate-actions.js';
-import { DSA5_Utility, DiceDSA5, FateRolls, UnifiedFateDSA5 } from './dsa5-api.js';
-import { buildUnifiedFateContext, buildRollRequestFateContext, extractDamageDice, getRegenBlessingActors, FATE_TAB_LABELS, STANDARD_FATE_TABS, STANDARD_ONLY_SPECIAL_KEYS } from './fate-context.js';
+import { promptManualConditions, promptAvesCheat, promptAvesDamageReroll } from './fate-dialogs.js';
+import { getDemonConditionRemovals, applyDemonConditionRemovals, applyXeledonRollUpdate } from './fate-effects.js';
+import { isBlockedFromGodSchips, rollSpecialSchipSymbols, buildFateChatContent, executeReroll, executeDamageReroll, executeAddQS, executeXeledonSubQS, executeFieserSchaden, executeGescheitert, executeImprove, executeMasterRegen, prepareRegenBlessing, executeRegenBlessing, consumeSchip, processReroll, processDamageReroll } from './fate-actions.js';
+import { DSA5_Utility, FateRolls, UnifiedFateDSA5 } from './dsa5-api.js';
+import { buildUnifiedFateContext, buildRollRequestFateContext, buildActorPickerFateContext, buildExternalXeledonFateContext, extractDamageDice, getRegenBlessingActors, getXeledonCandidateActors, getRollCardSwitchActors, FATE_TAB_LABELS, STANDARD_FATE_TABS, STANDARD_ONLY_SPECIAL_KEYS } from './fate-context.js';
 import './fate-chat-menu.js';
 
 const { renderTemplate } = foundry.applications.handlebars;
@@ -11,13 +11,30 @@ const { renderTemplate } = foundry.applications.handlebars;
 export default class GodsFateDSA5 extends UnifiedFateDSA5 {
     #isConfirming = false;
     selectedForMasterRegen = -1;
+    speakerActor = null;
 
-    #onRollRequestSync = (doc) => {
-        if (!this.rendered || !this.isRollRequest || this.#isConfirming) return;
+    #onLiveSync = (doc) => {
+        if (!this.rendered || this.#isConfirming) return;
         if (doc.id !== this.message?.id && doc.id !== this.dsaActor?.id) return;
-        if (!getRegenBlessingActors(this.message).length) {
-            this.close();
+
+        if (this.isRollRequest) {
+            if (!getRegenBlessingActors(this.message).length) {
+                this.close();
+                return;
+            }
+            this.render();
             return;
+        }
+
+        if (this.isExternalXeledon && !getRollCardSwitchActors(this.message, this.targetActor).some((a) => a.id === this.dsaActor?.id)) {
+            if (!game.user.isGM && !this.targetActor?.isOwner) {
+                this.close();
+                return;
+            }
+            this.dsaActor = this.targetActor;
+            this.selectedPool = 'personal';
+            this.selectedSpecialKey = null;
+            this.tabGroups.sheet = '';
         }
         this.render();
     };
@@ -28,8 +45,8 @@ export default class GodsFateDSA5 extends UnifiedFateDSA5 {
             actions: {
                 toggleMasterRegenDie: function (e, t) { this._onToggleMasterRegenDie(e, t); },
                 openChar: function () { this.dsaActor?.sheet?.render(true); },
-                quickSelectActor: function (e, t) { this._onQuickSelectRollRequestActor(e, t); },
-                unselectActor: function () { this._onUnselectRollRequestActor(); },
+                quickSelectActor: function (e, t) { this._onQuickSelectActor(e, t); },
+                unselectActor: function () { this._onUnselectActor(); },
             },
         },
     );
@@ -71,12 +88,43 @@ export default class GodsFateDSA5 extends UnifiedFateDSA5 {
         return app.render(true);
     }
 
+    static openForXeledon(message) {
+        const candidates = getXeledonCandidateActors(message);
+        if (!candidates.length) return;
+
+        let initialActor = null;
+        if (candidates.length === 1) {
+            initialActor = candidates[0];
+        } else if (game.user.character && candidates.some((a) => a.id === game.user.character.id)) {
+            initialActor = game.user.character;
+        }
+
+        const app = new this(message, initialActor || candidates[0]);
+        app.speakerActor = ChatMessage.getSpeakerActor(message.speaker);
+        app.dsaActor = initialActor;
+        app.selectedPool = 'special';
+        app.selectedSpecialKey = 'Xeledon';
+        return app.render(true);
+    }
+
     get isRollRequest() {
         return !!this.message?.flags?.dsa5?.rollRequest && !this.message?.flags?.data?.preData;
     }
 
+    get targetActor() {
+        return this.speakerActor || ChatMessage.getSpeakerActor(this.message?.speaker);
+    }
+
+    get isExternalXeledon() {
+        return !this.isRollRequest && !!this.dsaActor && !!this.targetActor && this.dsaActor.uuid !== this.targetActor.uuid;
+    }
+
     async _prepareContext(options) {
         if (this.isRollRequest) return buildRollRequestFateContext(this);
+        if (!this.speakerActor) this.speakerActor = this.dsaActor || ChatMessage.getSpeakerActor(this.message?.speaker);
+        if (!this.dsaActor) return buildActorPickerFateContext(this);
+        if (this.isExternalXeledon) return buildExternalXeledonFateContext(this);
+
         const context = await super._prepareContext(options);
         context.showFateBody = true;
         return context;
@@ -88,42 +136,67 @@ export default class GodsFateDSA5 extends UnifiedFateDSA5 {
 
     async _onFirstRender(context, options) {
         await super._onFirstRender(context, options);
-        if (this.isRollRequest) {
-            Hooks.on('updateChatMessage', this.#onRollRequestSync);
-            Hooks.on('updateActor', this.#onRollRequestSync);
-        }
+        Hooks.on('updateChatMessage', this.#onLiveSync);
+        Hooks.on('updateActor', this.#onLiveSync);
     }
 
     async _onClose(options) {
-        if (this.isRollRequest) {
-            Hooks.off('updateChatMessage', this.#onRollRequestSync);
-            Hooks.off('updateActor', this.#onRollRequestSync);
-        }
+        Hooks.off('updateChatMessage', this.#onLiveSync);
+        Hooks.off('updateActor', this.#onLiveSync);
         return super._onClose(options);
     }
 
-    _onQuickSelectRollRequestActor(event, target) {
+    #resetSelections() {
+        this.selectedForReroll?.clear?.();
+        this.selectedForDamageReroll?.clear?.();
+        this.selectedForImprove = -1;
+        this.selectedForSpecialReroll = -1;
+        this.selectedForMasterRegen = -1;
+    }
+
+    _onQuickSelectActor(event, target) {
         if (this.#isConfirming) return;
-        const actor = getRegenBlessingActors(this.message).find((a) => a.id === target.dataset.actorId);
+        const actorId = target.dataset.actorId;
+
+        if (this.isRollRequest) {
+            const actor = getRegenBlessingActors(this.message).find((a) => a.id === actorId);
+            if (!actor) return;
+            this.dsaActor = actor;
+            this.selectedPool = 'special';
+            this.selectedSpecialKey = null;
+            this.tabGroups.sheet = '';
+            this.render();
+            return;
+        }
+
+        const actor = getRollCardSwitchActors(this.message, this.targetActor).find((a) => a.id === actorId);
         if (!actor) return;
         this.dsaActor = actor;
-        this.selectedPool = 'special';
-        this.selectedSpecialKey = null;
+        this.#resetSelections();
         this.tabGroups.sheet = '';
+
+        if (this.isExternalXeledon) {
+            this.selectedPool = 'special';
+            this.selectedSpecialKey = 'Xeledon';
+        } else {
+            this.selectedPool = 'personal';
+            this.selectedSpecialKey = null;
+        }
         this.render();
     }
 
-    _onUnselectRollRequestActor() {
+    _onUnselectActor() {
         if (this.#isConfirming) return;
         this.dsaActor = null;
         this.selectedSpecialKey = null;
         this.tabGroups.sheet = '';
+        this.#resetSelections();
         this.render();
     }
 
     _canSelectPool(pool, key) {
         if (pool === 'special') return !!key;
-        if (this.isRollRequest) return false;
+        if (this.isRollRequest || this.isExternalXeledon) return false;
         return ['personal', 'group', 'master'].includes(pool);
     }
 
@@ -155,9 +228,9 @@ export default class GodsFateDSA5 extends UnifiedFateDSA5 {
             ui.notifications.warn(_loc('GodsMenu.FateTab.NoOptionNotify'));
             return false;
         }
-        if (tab.startsWith('specialAction_') || tab.startsWith('regenBlessing_')) return true;
-        if (tab === 'meisterschicksal') return this.selectedForReroll.size > 0 || this._warnNoDieSelected();
-        if (tab === 'beistand') return this.selectedForDamageReroll.size > 0 || this._warnNoDieSelected();
+        if (tab.startsWith('specialAction_') || tab.startsWith('regenBlessing_') || tab === 'xeledon_addQS') return true;
+        if (tab === 'meisterschicksal' || tab === 'xeledon_reroll') return this.selectedForReroll.size > 0 || this._warnNoDieSelected();
+        if (tab === 'beistand' || tab === 'xeledon_rerollDamage') return this.selectedForDamageReroll.size > 0 || this._warnNoDieSelected();
         if (tab === 'meisterRegen') return this.selectedForMasterRegen >= 0 || this._warnNoDieSelected();
         return super._validateDieSelection();
     }
@@ -175,7 +248,7 @@ export default class GodsFateDSA5 extends UnifiedFateDSA5 {
                 ui.notifications.error(_loc('DSAError.specialSchipEmpty'));
                 return false;
             }
-            return !this.#blockedFromGodSchips();
+            return !isBlockedFromGodSchips(this.dsaActor, this.selectedSpecialKey);
         }
         return super._validateSelectedPool();
     }
@@ -194,6 +267,9 @@ export default class GodsFateDSA5 extends UnifiedFateDSA5 {
             if (this.tabGroups.sheet.startsWith('specialAction_') || this.tabGroups.sheet.startsWith('regenBlessing_')) {
                 this.selectedPool = 'special';
                 this.selectedSpecialKey = this.tabGroups.sheet.split('_')[1];
+            } else if (this.tabGroups.sheet.startsWith('xeledon_')) {
+                this.selectedPool = 'special';
+                this.selectedSpecialKey = 'Xeledon';
             }
             if (this.selectedPool === 'special' || this.selectedPool === 'master') {
                 return await this.#onGodsConfirm(event, target, isCheat);
@@ -205,104 +281,23 @@ export default class GodsFateDSA5 extends UnifiedFateDSA5 {
         }
     }
 
-    async #buildChatContent(actionLabel, rollDetails, specialRollHtml, displayPool, displayKey, isConsumed, consumedAmount, { blocked = false } = {}) {
-        let max = 0;
-        let available = 0;
-        let tooltip = '';
-        let iconPath = '';
-
-        const consumedMod = isConsumed ? consumedAmount : 0;
-        let actorName = this.dsaActor.name;
-        let actionText = blocked ? _loc('GodsMenu.FateTab.usageBlocked') : _loc('GodsMenu.usesPointFor');
-        const headingKey = blocked ? 'GodsMenu.FateTab.UsageBlockedTitle' : 'CHATFATE.fatepointUsed';
-
-        switch (displayPool) {
-            case 'personal':
-                max = this.dsaActor.system.status.fatePoints.current || 0;
-                available = Math.max(0, (this.dsaActor.system.status.fatePoints.value || 0) - consumedMod);
-                tooltip = _loc('CHATFATE.PointsRemaining');
-                break;
-            case 'group': {
-                const { current, max: grpMax } = DSA5GodsMenuConfig.getSchipSetting('groupschips');
-                max = grpMax;
-                available = Math.max(0, current - consumedMod);
-                tooltip = _loc('CHATFATE.GroupPointsRemaining');
-                break;
-            }
-            case 'special': {
-                const sData = foundry.utils.getProperty(this.dsaActor, `flags.dsa5.specialPoints.${displayKey}`);
-                max = sData?.value || 0;
-                available = Math.max(0, (sData?.current || 0) - consumedMod);
-                iconPath = DSA5GodsMenuConfig.chipIcon(displayKey);
-                tooltip = _loc('GodsMenu.FateTab.SpecialPointsRemaining', { name: DSA5GodsMenuConfig.schipName(displayKey) });
-                break;
-            }
-            case 'master': {
-                const { current, max: mMax } = DSA5GodsMenuConfig.getSchipSetting('masterschips');
-                max = mMax;
-                available = Math.max(0, current - consumedMod);
-                tooltip = _loc('GodsMenu.FateTab.MasterPointsRemaining');
-                actorName = _loc('Gamemaster');
-                if (!blocked) actionText = _loc('GodsMenu.FateTab.MasterUsesPointFor');
-                break;
-            }
-        }
-
-        const schips = DSA5GodsMenuConfig.buildSchipDots(max, available, (isFull, _i, css) => {
-            if (displayPool === 'special') {
-                return {
-                    cssClass: `${css} gods-schip custom-special-schips`,
-                    style: `background-image: url('${iconPath}');`,
-                };
-            }
-            if (displayPool === 'master') {
-                const mPath = isFull ? 'systems/dsa5/icons/meisterschip.webp' : 'systems/dsa5/icons/gray_meisterschip.webp';
-                return {
-                    cssClass: `${css} master-schip-bg`,
-                    style: `background-image: url('${mPath}');`,
-                };
-            }
-            return { cssClass: css, style: '' };
-        });
-
-        return renderTemplate(DSA5GodsMenuConfig.templatePath('fate/chat-action-card.hbs'), {
-            headingKey,
-            actorName,
-            actionText,
-            actionLabel,
-            tooltip,
-            schips,
-            specialRollHtml,
-            rollDetails,
-        });
-    }
-
     #attemptedActionLabel() {
         const tab = this.tabGroups.sheet;
         if (tab.startsWith('specialAction_') || tab.startsWith('regenBlessing_')) {
             const key = tab.split('_')[1];
             return `${_loc('GodsMenu.FateTab.SpecialSchipAction')} [${DSA5GodsMenuConfig.schipName(key)}]`;
         }
+        if (tab.startsWith('xeledon_')) {
+            const baseKey = tab.replace('xeledon_', '');
+            return `${_loc(FATE_TAB_LABELS[baseKey])} (Xeledon)`;
+        }
         return FATE_TAB_LABELS[tab]
             ? _loc(FATE_TAB_LABELS[tab])
             : this.element.querySelector(`.sheet-tabs .item[data-tab="${tab}"]`).textContent.trim();
     }
 
-    #blockedFromGodSchips() {
-        const key = this.selectedSpecialKey;
-        if (!DSA5GodsMenuConfig.isGod(key) || key === 'Namenloser') return false;
-
-        const hasDemonMark = this.dsaActor.items.some((i) => i.type === 'demonmark');
-        const hasNamelessTradition = this.dsaActor.items.some((i) => i.name === _loc('LocalizedIDs.traditionNameless'));
-        if (!hasDemonMark && !hasNamelessTradition) return false;
-
-        const locKey = hasDemonMark ? 'DSAError.demonPactNoGodSchips' : 'DSAError.namelessCultistNoGodSchips';
-        ui.notifications.error(_loc(locKey, { name: this.dsaActor.name }));
-        return true;
-    }
-
     #syncStandardOnlySchipGlow() {
-        if (this.isRollRequest) return;
+        if (this.isRollRequest || this.isExternalXeledon) return;
         const isStandard = STANDARD_FATE_TABS.has(this.tabGroups?.sheet);
         const rollName = this.message?.flags?.data?.preData?.source?.name || '';
 
@@ -335,70 +330,21 @@ export default class GodsFateDSA5 extends UnifiedFateDSA5 {
         this.#syncStandardOnlySchipGlow();
     }
 
-    async #resolveSpecialSymbolOutcome(d1, d2, isGod) {
-        const godSymbol = d1 === 6;
-        const khaSymbol = d2 === 6;
-        switch (`${Number(godSymbol)}${Number(khaSymbol)}`) {
-            case '11':
-                return {
-                    executeEffect: true,
-                    schipToConsume: null,
-                    resultColor: 'darkgreen',
-                    resultTitle: _loc('GodsMenu.FateTab.SpecialRollSuccessTitle'),
-                    resultDesc: _loc('GodsMenu.FateTab.SpecialRollSuccessDesc'),
-                    resultTooltip: 'GodsMenu.SchipRules.Dice2',
-                };
-            case '10':
-                if (this.selectedSpecialKey === 'Phex' && STANDARD_FATE_TABS.has(this.tabGroups?.sheet)) {
-                    return {
-                        executeEffect: true,
-                        schipToConsume: null,
-                        resultColor: 'darkgreen',
-                        resultTitle: _loc('GodsMenu.FateTab.PhexRefundTitle'),
-                        resultDesc: _loc('GodsMenu.FateTab.PhexRefundDesc'),
-                        resultTooltip: 'GodsMenu.FateTab.PhexRefundDesc',
-                    };
-                }
-                {
-                    const chosen = await promptSchipSwap(this.dsaActor, this.selectedSpecialKey, isGod);
-                    const schipToConsume = chosen ?? { pool: this.selectedPool, key: this.selectedSpecialKey };
-                    return {
-                        executeEffect: true,
-                        schipToConsume,
-                        resultColor: chosen ? 'darkblue' : 'black',
-                        resultTitle: _loc(chosen ? 'GodsMenu.FateTab.SpecialRollFlexibleTitle' : 'GodsMenu.FateTab.SpecialRollNormalTitle'),
-                        resultDesc: _loc(chosen ? 'GodsMenu.FateTab.SpecialRollFlexibleDesc' : 'GodsMenu.FateTab.SpecialRollNormalDesc'),
-                        resultTooltip: chosen ? 'GodsMenu.SchipRules.Dice3' : 'GodsMenu.SchipRules.Dice5',
-                    };
-                }
-            case '01':
-                return {
-                    executeEffect: false,
-                    schipToConsume: null,
-                    resultColor: 'darkred',
-                    resultTitle: _loc('GodsMenu.FateTab.SpecialRollBlockedTitle'),
-                    resultDesc: _loc('GodsMenu.FateTab.SpecialRollBlockedDesc', {
-                        blocker: _loc(isGod ? 'GodsMenu.KhaSymbol' : 'GodsMenu.StarWallSymbol'),
-                        actorSymbol: _loc(isGod ? 'GodsMenu.GodSymbol' : 'GodsMenu.DemonSymbol'),
-                    }),
-                    resultTooltip: 'GodsMenu.SchipRules.Dice4',
-                };
-            default:
-                return {
-                    executeEffect: true,
-                    schipToConsume: { pool: this.selectedPool, key: this.selectedSpecialKey },
-                    resultColor: 'black',
-                    resultTitle: _loc('GodsMenu.FateTab.SpecialRollNormalTitle'),
-                    resultDesc: _loc('GodsMenu.FateTab.SpecialRollNormalDesc'),
-                    resultTooltip: 'GodsMenu.SchipRules.Dice5',
-                };
-        }
-    }
-
-    async #preparePreRollInputs(isSpecialAction, isRegenBlessing) {
+    async #preparePreRollInputs(isSpecialAction, isRegenBlessing, isXeledon) {
         let regenAllocations = null;
         const conditionsToRemove = [];
         let manualReductions = {};
+
+        if (isXeledon) {
+            if ((this.message.flags?.data?.fateSpecialUsed || []).includes('Xeledon')) {
+                ui.notifications.warn(_loc('GodsMenu.FateTab.XeledonAlreadyUsed'));
+                return null;
+            }
+            if (!game.user.isGM && (!this.message.isOwner || !this.targetActor?.isOwner) && !game.users.activeGM) {
+                ui.notifications.error(_loc('GodsMenu.FateTab.XeledonNoGM'));
+                return null;
+            }
+        }
 
         if (isRegenBlessing) {
             regenAllocations = await prepareRegenBlessing(this, this.selectedSpecialKey);
@@ -431,71 +377,6 @@ export default class GodsFateDSA5 extends UnifiedFateDSA5 {
         }
 
         return { regenAllocations, conditionsToRemove, manualReductions };
-    }
-
-    async #rollSpecialSymbols(isCheat) {
-        const isGod = DSA5GodsMenuConfig.isGod(this.selectedSpecialKey);
-        const d1Icon = DSA5GodsMenuConfig.diceIcon(this.selectedSpecialKey);
-        const d2Icon = DSA5GodsMenuConfig.diceIcon(null, isGod ? 'Kha.webp' : 'Sternenwall.webp');
-
-        const roll = await new Roll('1d6 + 1d6').evaluate();
-        let d1;
-        let d2;
-
-        if (isCheat) {
-            const cheatResult = await promptSpecialRollCheat(
-                _loc('GodsMenu.FateTab.SpecialRollTitle'),
-                d1Icon,
-                _loc(isGod ? 'GodsMenu.FateTab.GodDie' : 'GodsMenu.FateTab.DemonDie'),
-                d2Icon,
-                _loc(isGod ? 'GodsMenu.FateTab.KhaDie' : 'GodsMenu.FateTab.StarwallDie'),
-            );
-            if (cheatResult === null) {
-                ui.notifications.warn(_loc('GodsMenu.FateTab.ActionCancelled'));
-                return null;
-            }
-            ({ d1, d2 } = cheatResult);
-            roll.terms[0].results[0].result = d1;
-            roll.terms[2].results[0].result = d2;
-            roll._total = d1 + d2;
-        } else {
-            d1 = roll.terms[0].results[0].result;
-            d2 = roll.terms[2].results[0].result;
-        }
-
-        await DiceDSA5.showDiceSoNice(roll, game.settings.get('core', 'messageMode'));
-
-        if (!isGod) await applyDemonSchipRegen(this.dsaActor);
-
-        const outcome = await this.#resolveSpecialSymbolOutcome(d1, d2, isGod);
-
-        const die1Tooltip = _loc(isGod ? 'GodsMenu.GodSymbol' : 'GodsMenu.DemonSymbol');
-        const die2Tooltip = _loc(isGod ? 'GodsMenu.KhaSymbol' : 'GodsMenu.StarWallSymbol');
-        const causeIcons = [];
-        if (d1 === 6) causeIcons.push({ img: d1Icon, tooltip: die1Tooltip });
-        if (d2 === 6) causeIcons.push({ img: d2Icon, tooltip: die2Tooltip });
-
-        const specialRollHtml = await renderTemplate(DSA5GodsMenuConfig.templatePath('fate/special-roll-result.hbs'), {
-            die1Img: d1 === 6 ? d1Icon : null,
-            die2Img: d2 === 6 ? d2Icon : null,
-            d1Val: d1,
-            d2Val: d2,
-            die1Tooltip,
-            die2Tooltip,
-            die1Label: _loc(isGod ? 'GodsMenu.FateTab.GodDie' : 'GodsMenu.FateTab.DemonDie'),
-            die2Label: _loc(isGod ? 'GodsMenu.FateTab.KhaDie' : 'GodsMenu.FateTab.StarwallDie'),
-            causeIcons,
-            resultTitle: outcome.resultTitle,
-            resultDesc: outcome.resultDesc,
-            resultTooltip: outcome.resultTooltip,
-            resultColor: outcome.resultColor,
-        });
-
-        return {
-            executeEffect: outcome.executeEffect,
-            schipToConsume: outcome.schipToConsume,
-            specialRollHtml,
-        };
     }
 
     async #handleAvesCoin(coinRoll, isCheat) {
@@ -608,9 +489,11 @@ export default class GodsFateDSA5 extends UnifiedFateDSA5 {
 
         switch (tab) {
             case 'reroll':
-            case 'meisterschicksal': {
+            case 'meisterschicksal':
+            case 'xeledon_reroll': {
                 const isMasterReroll = tab === 'meisterschicksal';
-                const result = await executeReroll(this, data, newTestData, isCheat, isMasterReroll);
+                const isXeledon = tab === 'xeledon_reroll';
+                const result = await executeReroll(this, data, newTestData, isCheat, isMasterReroll, isXeledon);
                 if (!result) return null;
                 chatActionLabel = result.chatActionLabel;
                 chatRollDetails = result.chatRollDetails;
@@ -619,9 +502,11 @@ export default class GodsFateDSA5 extends UnifiedFateDSA5 {
                 break;
             }
             case 'rerollDamage':
-            case 'beistand': {
+            case 'beistand':
+            case 'xeledon_rerollDamage': {
                 const isMasterDamageReroll = tab === 'beistand';
-                const result = await executeDamageReroll(this, data, newTestData, isCheat, isMasterDamageReroll);
+                const isXeledon = tab === 'xeledon_rerollDamage';
+                const result = await executeDamageReroll(this, data, newTestData, isCheat, isMasterDamageReroll, isXeledon);
                 if (!result) return null;
                 chatActionLabel = result.chatActionLabel;
                 chatRollDetails = result.chatRollDetails;
@@ -631,6 +516,13 @@ export default class GodsFateDSA5 extends UnifiedFateDSA5 {
             }
             case 'addQS': {
                 const result = await executeAddQS(this, newTestData, cardOptions, avesDouble);
+                chatActionLabel = result.chatActionLabel;
+                chatRollDetails = result.chatRollDetails;
+                flagToUpdate.push(result.flagToUpdate);
+                break;
+            }
+            case 'xeledon_addQS': {
+                const result = await executeXeledonSubQS(newTestData, cardOptions);
                 chatActionLabel = result.chatActionLabel;
                 chatRollDetails = result.chatRollDetails;
                 flagToUpdate.push(result.flagToUpdate);
@@ -701,8 +593,9 @@ export default class GodsFateDSA5 extends UnifiedFateDSA5 {
 
         const isSpecialAction = this.tabGroups.sheet.startsWith('specialAction_');
         const isRegenBlessing = this.tabGroups.sheet.startsWith('regenBlessing_');
+        const isXeledon = this.tabGroups.sheet.startsWith('xeledon_');
 
-        const preRoll = await this.#preparePreRollInputs(isSpecialAction, isRegenBlessing);
+        const preRoll = await this.#preparePreRollInputs(isSpecialAction, isRegenBlessing, isXeledon);
         if (!preRoll) return;
         const { regenAllocations, conditionsToRemove, manualReductions } = preRoll;
 
@@ -713,22 +606,27 @@ export default class GodsFateDSA5 extends UnifiedFateDSA5 {
         let specialRollHtml = '';
 
         if (this.selectedPool === 'special') {
-            const symbolResult = await this.#rollSpecialSymbols(isCheat);
+            const symbolResult = await rollSpecialSchipSymbols({
+                actor: this.dsaActor,
+                key: this.selectedSpecialKey,
+                isCheat,
+                isPhexStandard: STANDARD_FATE_TABS.has(this.tabGroups?.sheet),
+            });
             if (!symbolResult) return await this.close();
             ({ executeEffect, schipToConsume, specialRollHtml } = symbolResult);
         }
 
         if (!executeEffect) {
-            const chatContent = await this.#buildChatContent(
-                this.#attemptedActionLabel(),
-                '',
+            const chatContent = await buildFateChatContent({
+                actor: this.dsaActor,
+                actionLabel: this.#attemptedActionLabel(),
                 specialRollHtml,
-                this.selectedPool,
-                this.selectedSpecialKey,
-                false,
-                0,
-                { blocked: true },
-            );
+                displayPool: this.selectedPool,
+                displayKey: this.selectedSpecialKey,
+                isConsumed: false,
+                consumedAmount: 0,
+                blocked: true,
+            });
             await ChatMessage.create(DSA5_Utility.chatDataSetup(chatContent));
             return await this.close();
         }
@@ -747,7 +645,7 @@ export default class GodsFateDSA5 extends UnifiedFateDSA5 {
             messageId: this.message.id,
         };
 
-        const isDamageContext = ['rerollDamage', 'beistand', 'fieser'].includes(this.tabGroups.sheet);
+        const isDamageContext = ['rerollDamage', 'beistand', 'fieser', 'xeledon_rerollDamage'].includes(this.tabGroups.sheet);
         for (const prop of ['attackerMessage', 'defenderMessage', 'unopposedStartMessage', 'startMessagesList']) {
             if (data[prop]) cardOptions[prop] = data[prop];
         }
@@ -765,16 +663,56 @@ export default class GodsFateDSA5 extends UnifiedFateDSA5 {
         let { chatActionLabel, chatRollDetails, flagToUpdate, specialRollsText } = actionResult;
         schipToConsume = actionResult.schipToConsume;
 
-        if (!cardOptions.skipNativePostFunction) {
-            await this.dsaActor[data.postData.postFunction]({ testData: newTestData, cardOptions }, { rerenderMessage: this.message });
-        } else if (this.tabGroups.sheet === 'gescheitert') {
-            const renderData = { testData: data.postData, preData: data.preData, hideData: data.hideData, hideDamage: data.hideDamage };
-            const html = await renderTemplate(data.template, renderData);
-            await this.message.update({ content: html, 'flags.data': data });
+        const updates = {};
+        flagToUpdate.forEach((flag) => { updates[`flags.data.${flag}`] = true; });
+
+        const targetActor = this.targetActor;
+        const needsGMDelegate = isXeledon && !game.user.isGM && (!this.message.isOwner || !targetActor?.isOwner);
+
+        if (needsGMDelegate) {
+            const serializedTestData = foundry.utils.deepClone(newTestData);
+            if (serializedTestData.roll instanceof Roll) serializedTestData.roll = serializedTestData.roll.toJSON();
+            const delegatedCardOptions = { ...cardOptions, user: this.message.author?.id };
+
+            const delegated = await applyXeledonRollUpdate({
+                messageId: this.message.id,
+                postFunction: data.postData.postFunction,
+                testData: serializedTestData,
+                cardOptions: delegatedCardOptions,
+                flagUpdates: updates,
+                clearTargets: isDamageContext || this.tabGroups.sheet === 'xeledon_addQS',
+            });
+            if (!delegated?.ok) {
+                ui.notifications.warn(_loc(delegated?.reason === 'alreadyUsed' ? 'GodsMenu.FateTab.XeledonAlreadyUsed' : 'GodsMenu.FateTab.XeledonNoGM'));
+                return await this.close();
+            }
+        } else {
+            if (!cardOptions.skipNativePostFunction) {
+                await (isXeledon ? targetActor : this.dsaActor)[data.postData.postFunction]({ testData: newTestData, cardOptions }, { rerenderMessage: this.message });
+            } else if (this.tabGroups.sheet === 'gescheitert') {
+                const renderData = { testData: data.postData, preData: data.preData, hideData: data.hideData, hideDamage: data.hideDamage };
+                const html = await renderTemplate(data.template, renderData);
+                await this.message.update({ content: html, 'flags.data': data });
+            }
+
+            if ((isSpecialAction || isXeledon) && this.selectedSpecialKey) {
+                const currentSpecials = [...(data.fateSpecialUsed || [])];
+                if (!currentSpecials.includes(this.selectedSpecialKey)) {
+                    currentSpecials.push(this.selectedSpecialKey);
+                    updates['flags.data.fateSpecialUsed'] = currentSpecials;
+                }
+            }
+
+            const updatedMessage = game.messages.get(this.message.id);
+            if (Object.keys(updates).length > 0 && updatedMessage?.isOwner) await updatedMessage.update(updates);
         }
 
         const updatedMessage = game.messages.get(this.message.id);
         const isSuccessful = updatedMessage?.flags?.data?.postData?.successLevel > 0;
+
+        if (this.isExternalXeledon && targetActor) {
+            chatRollDetails = `<p><b>${_loc('GodsMenu.FateTab.XeledonTarget', { name: targetActor.name })}</b></p>${chatRollDetails}`;
+        }
 
         if (avesCoinHtml) chatRollDetails += avesCoinHtml;
 
@@ -789,21 +727,17 @@ export default class GodsFateDSA5 extends UnifiedFateDSA5 {
         const finalKey = schipToConsume ? schipToConsume.key : this.selectedSpecialKey;
         const isConsumed = schipToConsume !== null;
         const consumedAmount = schipToConsume?.amount || 1;
-        const chatContent = await this.#buildChatContent(chatActionLabel, chatRollDetails, specialRollHtml, finalPool, finalKey, isConsumed, consumedAmount);
+        const chatContent = await buildFateChatContent({
+            actor: this.dsaActor,
+            actionLabel: chatActionLabel,
+            rollDetails: chatRollDetails,
+            specialRollHtml,
+            displayPool: finalPool,
+            displayKey: finalKey,
+            isConsumed,
+            consumedAmount,
+        });
         await ChatMessage.create(DSA5_Utility.chatDataSetup(chatContent));
-
-        const updates = {};
-        flagToUpdate.forEach((flag) => { updates[`flags.data.${flag}`] = true; });
-
-        if (isSpecialAction && this.selectedSpecialKey) {
-            const currentSpecials = data.fateSpecialUsed || [];
-            if (!currentSpecials.includes(this.selectedSpecialKey)) {
-                currentSpecials.push(this.selectedSpecialKey);
-                updates['flags.data.fateSpecialUsed'] = currentSpecials;
-            }
-        }
-
-        if (Object.keys(updates).length > 0 && updatedMessage?.isOwner) await updatedMessage.update(updates);
 
         await consumeSchip(this.dsaActor, schipToConsume);
 
