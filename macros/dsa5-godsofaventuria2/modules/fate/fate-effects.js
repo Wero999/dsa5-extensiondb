@@ -1,9 +1,12 @@
 import { DSA5GodsMenuConfig } from './config.js';
+import { DiceDSA5, DSA5_Utility } from './dsa5-api.js';
 import { REGEN_BLESSING_CONFIG } from './fate-context.js';
 
 export const DEMON_SCHIP_REGEN_ID = 'demonSchipRegen';
 const REGEN_BLESSING_QUERY = `${DSA5GodsMenuConfig.MODULE_ID}.applyRegenBlessing`;
+const XELEDON_ROLL_QUERY = `${DSA5GodsMenuConfig.MODULE_ID}.applyXeledonRollUpdate`;
 const pendingRegenBlessings = new Set();
+const pendingXeledonUpdates = new Set();
 
 const DEMON_REMOVALS = {
     Amazeroth: { auto: ['confusion'] },
@@ -105,23 +108,67 @@ export async function applyRegenBlessing(payload) {
     const activeGM = game.users.activeGM;
     if (!activeGM) return { ok: false, reason: 'noGM' };
 
-    if (typeof activeGM.query === 'function') {
-        try {
-            return await activeGM.query(REGEN_BLESSING_QUERY, payload);
-        } catch {
-            return { ok: false, reason: 'noGM' };
-        }
+    try {
+        return await activeGM.query(REGEN_BLESSING_QUERY, payload);
+    } catch {
+        return { ok: false, reason: 'noGM' };
     }
-
-    game.socket.emit(DSA5GodsMenuConfig.SOCKET, { type: 'applyRegenBlessing', ...payload });
-    return { ok: true, applied: payload.allocations };
 }
 
-function registerRegenBlessingQuery() {
-    if (CONFIG.queries) CONFIG.queries[REGEN_BLESSING_QUERY] = executeRegenBlessingUpdates;
+async function executeXeledonRollUpdate({ messageId, postFunction, testData, cardOptions, flagUpdates, clearTargets }) {
+    if (pendingXeledonUpdates.has(messageId)) return { ok: false, reason: 'alreadyUsed' };
+    pendingXeledonUpdates.add(messageId);
+
+    try {
+        const msg = game.messages.get(messageId);
+        if (!msg?.flags?.data?.preData) return { ok: false, reason: 'invalid' };
+
+        const currentSpecials = foundry.utils.getProperty(msg, 'flags.data.fateSpecialUsed') || [];
+        if (currentSpecials.includes('Xeledon')) return { ok: false, reason: 'alreadyUsed' };
+
+        const targetActor = ChatMessage.getSpeakerActor(msg.speaker);
+        if (!targetActor || typeof targetActor[postFunction] !== 'function') return { ok: false, reason: 'invalid' };
+
+        if (clearTargets) DSA5_Utility.clearUserTargets();
+        if (testData.roll) testData.roll = DiceDSA5.fromRollData(testData.roll);
+        cardOptions.user = msg.author;
+
+        await targetActor[postFunction]({ testData, cardOptions }, { rerenderMessage: msg });
+
+        const updatedMsg = game.messages.get(messageId);
+        if (updatedMsg) {
+            await updatedMsg.update({
+                ...flagUpdates,
+                'flags.data.fateSpecialUsed': [...currentSpecials, 'Xeledon'],
+            });
+        }
+
+        return { ok: true };
+    } finally {
+        pendingXeledonUpdates.delete(messageId);
+    }
 }
-registerRegenBlessingQuery();
-Hooks.once('init', registerRegenBlessingQuery);
+
+export async function applyXeledonRollUpdate(payload) {
+    if (game.user.isGM) return executeXeledonRollUpdate(payload);
+
+    const activeGM = game.users.activeGM;
+    if (!activeGM) return { ok: false, reason: 'noGM' };
+
+    try {
+        return await activeGM.query(XELEDON_ROLL_QUERY, payload);
+    } catch {
+        return { ok: false, reason: 'noGM' };
+    }
+}
+
+function registerQueries() {
+    if (!CONFIG.queries) return;
+    CONFIG.queries[REGEN_BLESSING_QUERY] = executeRegenBlessingUpdates;
+    CONFIG.queries[XELEDON_ROLL_QUERY] = executeXeledonRollUpdate;
+}
+registerQueries();
+Hooks.once('init', registerQueries);
 
 DSA5GodsMenuConfig.registerSocketHandler('applyRegenBlessing', async (payload) => {
     if (!game.users.activeGM?.isSelf) return;
