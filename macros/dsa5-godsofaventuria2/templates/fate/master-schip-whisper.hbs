@@ -1,0 +1,11 @@
+<div class="dsa5 chat-card">
+    <div class="card-content">
+        <h5 class="center"><b>{{#if isGain}}{{localize "GodsMenu.MasterAuto.TitleGain"}}{{else}}{{localize "GodsMenu.MasterAuto.TitleLoss"}}{{/if}} ({{deltaLabel}})</b></h5>
+        <p class="center">{{reason}}</p>
+        <div class="row-section center" data-tooltip="{{tooltip}}">
+            {{#each schips}}
+                <span class="schip tiny {{this.cssClass}}" style="{{this.style}}"></span>
+            {{/each}}
+        </div>
+    </div>
+</div>
