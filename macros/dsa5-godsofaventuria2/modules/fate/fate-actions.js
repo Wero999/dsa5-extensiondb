@@ -1,8 +1,9 @@
 import { DSA5_Utility, DiceDSA5, FateRolls } from './dsa5-api.js';
-import { DSA5GodsMenuConfig } from './config.js';
-import { promptRerollCheat, promptRegenDistribution, promptSchipSwap, promptSpecialRollCheat } from './fate-dialogs.js';
-import { REGEN_BLESSING_CONFIG, getEligibleCompanions } from './fate-context.js';
+import { DSA5GodsMenuConfig, REGEN_BLESSING_CONFIG } from './config.js';
+import { promptAvesCheat, promptAvesReroll, promptAvesDamageReroll, promptRerollCheat, promptRegenDistribution, promptSchipSwap, promptSpecialRollCheat } from './fate-dialogs.js';
+import { extractDamageDice, getEligibleCompanions } from './fate-context.js';
 import { applyRegenBlessing, applyDemonSchipRegen } from './fate-effects.js';
+import { notifyHeroSchipSpent } from './master-schip-automation.js';
 
 const { renderTemplate } = foundry.applications.handlebars;
 
@@ -162,64 +163,47 @@ export async function buildFateChatContent({
     consumedAmount = 1,
     blocked = false,
 }) {
-    let max = 0;
-    let available = 0;
-    let tooltip = '';
-    let iconPath = '';
-
     const consumedMod = isConsumed ? consumedAmount : 0;
     let actorName = actor.name;
     let actionText = blocked ? _loc('GodsMenu.FateTab.usageBlocked') : _loc('GodsMenu.usesPointFor');
     const headingKey = blocked ? 'GodsMenu.FateTab.UsageBlockedTitle' : 'CHATFATE.fatepointUsed';
 
+    let tooltip = '';
+    let schips = [];
+
     switch (displayPool) {
-        case 'personal':
-            max = actor.system.status.fatePoints.current || 0;
-            available = Math.max(0, (actor.system.status.fatePoints.value || 0) - consumedMod);
+        case 'personal': {
+            const max = actor.system.status.fatePoints.current || 0;
+            const available = Math.max(0, (actor.system.status.fatePoints.value || 0) - consumedMod);
             tooltip = _loc('CHATFATE.PointsRemaining');
+            schips = DSA5GodsMenuConfig.buildSchipDots(max, available, (_isFull, _i, css) => ({ cssClass: css, style: '' }));
             break;
+        }
         case 'group': {
-            const { current, max: grpMax } = DSA5GodsMenuConfig.getSchipSetting('groupschips');
-            max = grpMax;
-            available = Math.max(0, current - consumedMod);
+            const { current, max } = DSA5GodsMenuConfig.getSchipSetting('groupschips');
             tooltip = _loc('CHATFATE.GroupPointsRemaining');
+            schips = DSA5GodsMenuConfig.buildSchipDots(max, Math.max(0, current - consumedMod), (_isFull, _i, css) => ({ cssClass: css, style: '' }));
             break;
         }
         case 'special': {
-            const sData = foundry.utils.getProperty(actor, `flags.dsa5.specialPoints.${displayKey}`);
-            max = sData?.value || 0;
-            available = Math.max(0, (sData?.current || 0) - consumedMod);
-            iconPath = DSA5GodsMenuConfig.chipIcon(displayKey);
+            const { current, max } = DSA5GodsMenuConfig.getSpecialSchip(actor, displayKey);
+            const style = DSA5GodsMenuConfig.chipStyle(displayKey);
             tooltip = _loc('GodsMenu.FateTab.SpecialPointsRemaining', { name: DSA5GodsMenuConfig.schipName(displayKey) });
+            schips = DSA5GodsMenuConfig.buildSchipDots(max, Math.max(0, current - consumedMod), (_isFull, _i, css) => ({
+                cssClass: `${css} gods-schip custom-special-schips`,
+                style,
+            }));
             break;
         }
         case 'master': {
-            const { current, max: mMax } = DSA5GodsMenuConfig.getSchipSetting('masterschips');
-            max = mMax;
-            available = Math.max(0, current - consumedMod);
+            const { current, max } = DSA5GodsMenuConfig.getSchipSetting('masterschips');
             tooltip = _loc('GodsMenu.FateTab.MasterPointsRemaining');
             actorName = _loc('Gamemaster');
             if (!blocked) actionText = _loc('GodsMenu.FateTab.MasterUsesPointFor');
+            schips = DSA5GodsMenuConfig.buildMasterSchipDots(max, Math.max(0, current - consumedMod), { background: true });
             break;
         }
     }
-
-    const schips = DSA5GodsMenuConfig.buildSchipDots(max, available, (isFull, _i, css) => {
-        if (displayPool === 'special') {
-            return {
-                cssClass: `${css} gods-schip custom-special-schips`,
-                style: `background-image: url('${iconPath}');`,
-            };
-        }
-        if (displayPool === 'master') {
-            const mPath = isFull ? 'systems/dsa5/icons/meisterschip.webp' : 'systems/dsa5/icons/gray_meisterschip.webp';
-            return {
-                cssClass: `${css} master-schip-bg`,
-                style: `background-image: url('${mPath}');`,
-            };
-        }
-        return { cssClass: css, style: '' };
-    });
 
     return renderTemplate(DSA5GodsMenuConfig.templatePath('fate/chat-action-card.hbs'), {
         headingKey,
@@ -234,8 +218,7 @@ export async function buildFateChatContent({
 }
 
 export async function triggerStandaloneSpecialSchip({ actor, key, actionLabel, rollDetails = '' }) {
-    const currentVal = foundry.utils.getProperty(actor, `flags.dsa5.specialPoints.${key}.current`) || 0;
-    if (currentVal <= 0) {
+    if (DSA5GodsMenuConfig.getSpecialSchip(actor, key).current <= 0) {
         ui.notifications.error(_loc('DSAError.specialSchipEmpty'));
         return { executed: false, blocked: false };
     }
@@ -282,6 +265,101 @@ export async function triggerStandaloneSpecialSchip({ actor, key, actionLabel, r
     await consumeSchip(actor, schipToConsume);
 
     return { executed: true, blocked: false, schipToConsume };
+}
+
+export async function triggerStandaloneMasterSchip({ actor, actionLabel, rollDetails = '', amount = 1 }) {
+    if (!game.user.isGM) return { executed: false };
+
+    const { current } = DSA5GodsMenuConfig.getSchipSetting('masterschips');
+    if (current < amount) {
+        ui.notifications.error(_loc('GodsMenu.FateTab.MasterSchipEmpty'));
+        return { executed: false };
+    }
+
+    const chatContent = await buildFateChatContent({
+        actor,
+        actionLabel,
+        rollDetails,
+        displayPool: 'master',
+        isConsumed: true,
+        consumedAmount: amount,
+    });
+    await ChatMessage.create(DSA5_Utility.chatDataSetup(chatContent));
+    await consumeSchip(actor, { pool: 'master', amount });
+
+    return { executed: true };
+}
+
+// Aves-Münzwurf & zweiter Nachwurf
+
+async function postAvesSecondRollChat(rollDetailsHtml) {
+    const heading = `${_loc('GodsMenu.FateTab.AvesHeadTitle')} (${_loc('GodsMenu.FateTab.AvesSecondRoll')})`;
+    await ChatMessage.create(DSA5_Utility.chatDataSetup(`<h5 class="center"><b>${heading}</b></h5>${rollDetailsHtml}`));
+}
+
+export async function resolveAvesCoin({ actor, selectedPool, selectedSpecialKey, isStandard, coinRoll, isCheat }) {
+    if (selectedPool !== 'special' || selectedSpecialKey !== 'Aves' || !isStandard) {
+        return { avesDouble: false, avesCoinHtml: '' };
+    }
+
+    if (isCheat) {
+        const cheatResult = await promptAvesCheat();
+        if (cheatResult === null) {
+            ui.notifications.warn(_loc('GodsMenu.FateTab.ActionCancelled'));
+            return null;
+        }
+        coinRoll.terms[0].results[0].result = cheatResult;
+        coinRoll._total = cheatResult;
+    }
+
+    const avesDouble = coinRoll.total === 1;
+    const avesCoinHtml = await renderTemplate(DSA5GodsMenuConfig.templatePath('fate/aves-coin-result.hbs'), {
+        actorName: actor.name,
+        avesImg: DSA5GodsMenuConfig.chipIcon('Aves'),
+        isSuccess: avesDouble,
+        resultTitle: _loc(avesDouble ? 'GodsMenu.FateTab.AvesHeadTitle' : 'GodsMenu.FateTab.AvesTailTitle'),
+        resultDesc: _loc(avesDouble ? 'GodsMenu.FateTab.AvesHeadDesc' : 'GodsMenu.FateTab.AvesTailDesc'),
+    });
+
+    return { avesDouble, avesCoinHtml };
+}
+
+export async function executeAvesSecondReroll({ actor, message, data, newTestData, cardOptions, isCheat }) {
+    const diesToReroll = await promptAvesReroll(data.preData, data.postData);
+    if (!diesToReroll?.length) return;
+
+    const isPhex = DSA5GodsMenuConfig.hasPhexTradition(actor);
+    const rerollData = await processReroll(diesToReroll, newTestData, data.postData, 'CHATCONTEXT.Reroll', false, actor, isPhex, isCheat);
+    if (!rerollData) {
+        ui.notifications.warn(_loc('GodsMenu.FateTab.ActionCancelled'));
+        return;
+    }
+
+    newTestData.fateUsed = true;
+    await actor[data.postData.postFunction]({ testData: newTestData, cardOptions }, { rerenderMessage: message });
+    await postAvesSecondRollChat(FateRolls.formatDieChangesHtml(rerollData.changedRolls));
+}
+
+export async function executeAvesSecondDamageReroll({ actor, message, data, newTestData, cardOptions, isCheat }) {
+    const damageDice = extractDamageDice(newTestData.damageRoll);
+    if (!damageDice.length) return;
+
+    const dieIndex = await promptAvesDamageReroll(damageDice);
+    if (dieIndex === null) return;
+
+    const rerollResult = await processDamageReroll([dieIndex], newTestData.damageRoll, data.messageMode, isCheat);
+    if (!rerollResult) return;
+
+    newTestData.damageRoll = rerollResult.damageRoll;
+    DSA5_Utility.clearUserTargets();
+    await actor[data.postData.postFunction]({ testData: newTestData, cardOptions }, { rerenderMessage: message });
+
+    const updatedMsg = game.messages.get(message.id);
+    if (updatedMsg?.isOwner) {
+        await updatedMsg.update({ [`flags.data.${FateRolls.FLAGS.FATE_DAMAGE_REROLL}`]: true });
+    }
+
+    await postAvesSecondRollChat(rerollResult.chatRollDetails);
 }
 
 // Wurf-Reroll und Auswertung
@@ -346,7 +424,7 @@ export async function executeReroll(app, data, newTestData, isCheat, isMasterRer
     newTestData.fateUsed = true;
 
     const chatActionLabel = isXeledon
-        ? `${_loc('GodsMenu.FateTab.Reroll')} (Xeledon)`
+        ? _loc('GodsMenu.FateTab.XeledonActionLabel', { label: _loc('GodsMenu.FateTab.Reroll') })
         : _loc(isMasterReroll ? 'GodsMenu.FateTab.MasterFate' : 'GodsMenu.FateTab.Reroll');
 
     return {
@@ -382,9 +460,9 @@ export async function processDamageReroll(selectedIndices, origDamageData, messa
     if (!rerollFormulas.length) return null;
 
     let newRerollDie = await new Roll(rerollFormulas.join(' + ')).evaluate();
-    newRerollDie = await DiceDSA5.manualRolls(newRerollDie, 'CHATCONTEXT.rerollDamage', { cheat: false });
-
-    if (isCheat) {
+    if (!isCheat) {
+        newRerollDie = await DiceDSA5.manualRolls(newRerollDie, 'CHATCONTEXT.rerollDamage', { cheat: false });
+    } else {
         const diceData = diceMapping.map((mapping, idx) => ({
             rollIndex: idx,
             original: mapping.originalResult,
@@ -408,7 +486,7 @@ export async function processDamageReroll(selectedIndices, origDamageData, messa
     newRerollDie.dice.forEach((die) => { die.options.colorset = FateRolls.DICE_COLOR_BLACK; });
     await DiceDSA5.showDiceSoNice(newRerollDie, messageMode);
 
-    let finalRoll = Roll.fromData(originalRoll.toJSON());
+    const finalRoll = Roll.fromData(originalRoll.toJSON());
     let newResultFlatIndex = 0;
     const damageChangesHtml = [];
 
@@ -422,11 +500,8 @@ export async function processDamageReroll(selectedIndices, origDamageData, messa
     });
 
     finalRoll._total = finalRoll._evaluateTotal();
-    finalRoll = await DiceDSA5.manualRolls(finalRoll, 'CHATCONTEXT.rerollDamage', { cheat: false });
-
-    foundry.utils.setProperty(finalRoll, 'options.diceSoNice', false);
     const damageRoll = finalRoll.toJSON();
-    damageRoll.options.diceSoNice = false;
+    damageRoll.options = { ...damageRoll.options, diceSoNice: false };
 
     return {
         damageRoll,
@@ -451,7 +526,7 @@ export async function executeDamageReroll(app, data, newTestData, isCheat, isMas
     newTestData.damageRoll = result.damageRoll;
 
     const chatActionLabel = isXeledon
-        ? `${_loc('GodsMenu.FateTab.RerollDamage')} (Xeledon)`
+        ? _loc('GodsMenu.FateTab.XeledonActionLabel', { label: _loc('GodsMenu.FateTab.RerollDamage') })
         : _loc(isMasterDamageReroll ? 'GodsMenu.FateTab.MasterDarkness' : 'GodsMenu.FateTab.RerollDamage');
 
     return {
@@ -479,13 +554,18 @@ export async function executeAddQS(app, newTestData, cardOptions, avesDouble) {
     };
 }
 
-export async function executeXeledonSubQS(newTestData, cardOptions) {
+export async function executeXeledonSubQS(data, newTestData, cardOptions) {
+    const currentQS = Number(data.postData.qualityStep) || 0;
+    const rawFpQS = Math.max(1, Math.ceil((Number(data.postData.result) || 0) / 3));
+    const existingQS = Number(newTestData.qualityStep) || 0;
+    const overshoot = Math.max(0, rawFpQS + existingQS - currentQS);
+
     DSA5_Utility.clearUserTargets();
     cardOptions.fatePointAddQSUsed = true;
-    newTestData.qualityStep = (Number(newTestData.qualityStep) || 0) - 1;
+    newTestData.qualityStep = existingQS - 1 - overshoot;
 
     return {
-        chatActionLabel: `${_loc('GodsMenu.FateTab.AddQS')} (Xeledon)`,
+        chatActionLabel: _loc('GodsMenu.FateTab.XeledonActionLabel', { label: _loc('GodsMenu.FateTab.AddQS') }),
         chatRollDetails: _loc('GodsMenu.FateTab.XeledonSubQSChatDetail'),
         flagToUpdate: FateRolls.FLAGS.FATE_ADD_QS,
     };
@@ -498,7 +578,10 @@ export async function executeFieserSchaden(app, data, newTestData, isCheat) {
     const originalRoll = DiceDSA5.fromRollData(origDamageData);
     if (!originalRoll?.terms) return null;
 
-    const extraDie = await new Roll('1d6').evaluate();
+    let extraDie = await new Roll('1d6').evaluate();
+    if (!isCheat) {
+        extraDie = await DiceDSA5.manualRolls(extraDie, 'GodsMenu.FateTab.MasterNastyDamage', { cheat: false });
+    }
     let extraDamage = extraDie.total;
 
     if (isCheat) {
@@ -543,19 +626,20 @@ export async function executeFieserSchaden(app, data, newTestData, isCheat) {
 // Gescheiterter Angriff
 
 export async function executeGescheitert(app, data, cardOptions) {
-    const successLvl = data.postData.successLevel ?? data.postData.result?.successLevel ?? 0;
-    const isCrit = (successLvl > 2) || data.postData.result?.critical;
+    const successLvl = data.postData.successLevel ?? 0;
+    const isCrit = successLvl > 2 || data.postData.critical;
     const cost = isCrit ? 3 : 2;
-    const failureText = _loc('Failure');
 
-    for (const target of [data.postData, data.postData.result].filter(Boolean)) {
-        target.successLevel = -1;
-        target.success = false;
-        target.critical = false;
-        target.description = failureText;
-        target.characteristics?.forEach((c) => { c.success = false; });
-    }
+    data.postData.successLevel = -1;
+    data.postData.success = false;
+    data.postData.critical = false;
+    data.postData.description = _loc('Failure');
     data.postData.halfDefense = false;
+    data.postData.characteristics?.forEach((c) => { c.success = false; });
+
+    const renderData = { testData: data.postData, preData: data.preData, hideData: data.hideData, hideDamage: data.hideDamage };
+    const html = await renderTemplate(data.template, renderData);
+    await app.message.update({ content: html, 'flags.data': data });
 
     cardOptions.skipNativePostFunction = true;
 
@@ -607,7 +691,7 @@ export async function executeImprove(app, data, newTestData, isCheat, cardOption
     return { chatActionLabel, flagsToUpdate, specialRollsText };
 }
 
-// Regeneration wiederholen (Meisterschip, zweites Ergebnis bindend)
+// Regeneration wiederholen (Meisterschip)
 
 export async function executeMasterRegen(app, data, isCheat, cardOptions) {
     const idx = app.selectedForMasterRegen;
@@ -665,7 +749,7 @@ export async function executeMasterRegen(app, data, isCheat, cardOptions) {
         const newStatVal = Math.max(0, (Number(data.postData[attr]) || 0) + diff);
         updates[`flags.data.postData.${attr}`] = newStatVal;
 
-        const input = tpl.content.querySelector(`input.roll-edit[data-tooltip="${catString}"]`);
+        const input = tpl.content.querySelector(`input.roll-edit[data-tooltip="${CSS.escape(catString)}"]`);
         if (input) {
             input.value = String(newStatVal);
             input.setAttribute('value', String(newStatVal));
@@ -689,7 +773,7 @@ export async function executeMasterRegen(app, data, isCheat, cardOptions) {
     };
 }
 
-// Regenerations-Segen auf Probenaufforderung (Mada / Travia): Vorbereitung vor dem 2W6-Wurf
+// Regenerationsverbesserung Mada / Travia): Vorbereitung
 
 export async function prepareRegenBlessing(app, key) {
     const cfg = REGEN_BLESSING_CONFIG[key];
@@ -722,7 +806,7 @@ export async function prepareRegenBlessing(app, key) {
     return allocations;
 }
 
-// Regenerations-Segen auf Probenaufforderung (Mada / Travia): Anwendung nach dem 2W6-Wurf
+// Regenerationsverbesserung Mada / Travia):  Anwendung
 
 export async function executeRegenBlessing(app, key, allocations, cardOptions) {
     const cfg = REGEN_BLESSING_CONFIG[key];
@@ -743,12 +827,12 @@ export async function executeRegenBlessing(app, key, allocations, cardOptions) {
     cardOptions.skipNativePostFunction = true;
 
     return {
-        chatActionLabel: `${DSA5GodsMenuConfig.schipName(key)}-Schip`,
-        chatRollDetails: result.applied.map((a) => `<p><b>${a.name}</b>: +${a.amount} ${cfg.resource}</p>`).join(''),
+        chatActionLabel: DSA5GodsMenuConfig.schipLabel(key),
+        chatRollDetails: result.applied.map((a) => `<p><b>${foundry.utils.escapeHTML(a.name)}</b>: +${a.amount} ${cfg.resource}</p>`).join(''),
     };
 }
 
-// Hilfsfunktionen (Schips abziehen)
+// Schips abziehen
 
 export async function consumeSchip(actor, schipToConsume) {
     if (!schipToConsume) return;
@@ -766,9 +850,8 @@ export async function consumeSchip(actor, schipToConsume) {
             }
             break;
         case 'special': {
-            const path = `flags.dsa5.specialPoints.${schipToConsume.key}.current`;
-            const currentVal = foundry.utils.getProperty(actor, path) || 0;
-            await actor.update({ [path]: Math.max(0, currentVal - amount) });
+            const { current } = DSA5GodsMenuConfig.getSpecialSchip(actor, schipToConsume.key);
+            await actor.update({ [`flags.dsa5.specialPoints.${schipToConsume.key}.current`]: Math.max(0, current - amount) });
             break;
         }
         case 'master': {
@@ -776,5 +859,9 @@ export async function consumeSchip(actor, schipToConsume) {
             await DSA5GodsMenuConfig.setSchipSetting('masterschips', current - amount, max);
             break;
         }
+    }
+
+    if (schipToConsume.pool !== 'master') {
+        await notifyHeroSchipSpent({ actor, pool: schipToConsume.pool, amount });
     }
 }
