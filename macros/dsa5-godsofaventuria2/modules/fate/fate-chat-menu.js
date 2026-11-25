@@ -3,7 +3,7 @@ import { UnifiedFateDSA5 } from './dsa5-api.js';
 import { getRegenBlessingActors, getXeledonCandidateActors } from './fate-context.js';
 
 function getMessageFromLi(li) {
-    const el = li?.length ? li[0] : li;
+    const el = li?.[0] ?? li;
     return el?.dataset?.messageId ? game.messages.get(el.dataset.messageId) : null;
 }
 
@@ -11,6 +11,24 @@ function canOpenExternalXeledon(message) {
     if (game.user.isGM || !message?.flags?.data?.preData) return false;
     const speakerActor = ChatMessage.getSpeakerActor(message.speaker);
     if (speakerActor?.isOwner) return false;
+    return getXeledonCandidateActors(message).length > 0;
+}
+
+function hasGodsPools(li) {
+    const message = getMessageFromLi(li);
+    if (!message?.flags?.data?.preData) return false;
+
+    const actor = ChatMessage.getSpeakerActor(message.speaker);
+    if (!actor || !(actor.isOwner || game.user.isGM)) return false;
+
+    if (DSA5GodsMenuConfig.hasAnySpecialSchip(actor)) return true;
+    if (!game.user.isGM) return false;
+
+    const isRegen = (message.flags.data.postData?.rollType || message.flags.data.preData.source?.type) === 'regenerate';
+    if (!(isRegen && message.flags.data.meisterRegenUsed) && DSA5GodsMenuConfig.getSchipSetting('masterschips').current > 0) {
+        return true;
+    }
+
     return getXeledonCandidateActors(message).length > 0;
 }
 
@@ -29,8 +47,10 @@ Hooks.on('getChatMessageContextOptions', (html, options) => {
             const message = getMessageFromLi(li);
             return getRegenBlessingActors(message).length > 0 || canOpenExternalXeledon(message);
         },
-        onClick: (event, li) => {
+        onClick: (_event, li) => {
             const message = getMessageFromLi(li);
+            if (!message) return;
+
             const registry = { AppClass: UnifiedFateDSA5 };
             Hooks.callAll('dsa5.getFateSpendApp', registry);
 
@@ -42,27 +62,3 @@ Hooks.on('getChatMessageContextOptions', (html, options) => {
         },
     });
 });
-
-function hasGodsPools(li) {
-    const message = getMessageFromLi(li);
-    if (!message?.flags?.data?.preData) return false;
-
-    const actor = ChatMessage.getSpeakerActor(message.speaker);
-    if (!actor || !(actor.isOwner || game.user.isGM)) return false;
-
-    const specialPoints = foundry.utils.getProperty(actor, 'flags.dsa5.specialPoints');
-    if (specialPoints && Object.values(specialPoints).some((p) => (p?.current || 0) > 0)) {
-        return true;
-    }
-
-    const isRegen = (message.flags.data.postData?.rollType || message.flags.data.preData.source?.type) === 'regenerate';
-    if (game.user.isGM && !(isRegen && message.flags.data.meisterRegenUsed)) {
-        if (DSA5GodsMenuConfig.getSchipSetting('masterschips').current > 0) return true;
-    }
-
-    if (game.user.isGM && getXeledonCandidateActors(message).length > 0) {
-        return true;
-    }
-
-    return false;
-}
