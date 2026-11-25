@@ -1,0 +1,14 @@
+<div class="dialog-content standard-form">
+    <h4 class="center">{{localize "GodsMenu.FateTab.RerollDamage"}}</h4>
+    <div class="card-content hide-option roll-result center flexrow flexAlignCenter dsamt-4">
+        {{#each damageDice}}
+            <a class="dieButton{{#if this.selected}} dieSelected{{/if}}"
+               data-index="{{this.index}}"
+               role="button"
+               tabindex="0"
+               aria-pressed="{{#if this.selected}}true{{else}}false{{/if}}">
+                <span data-tooltip="{{this.tooltip}}" class="display-toggle fail die-damage d{{this.faces}}">{{this.currentValue}}</span>
+            </a>
+        {{/each}}
+    </div>
+</div>
