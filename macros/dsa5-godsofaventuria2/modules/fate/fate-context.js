@@ -1,4 +1,4 @@
-import { DSA5GodsMenuConfig } from './config.js';
+import { DSA5GodsMenuConfig, REGEN_BLESSING_CONFIG } from './config.js';
 import { DiceDSA5, FateRolls } from './dsa5-api.js';
 
 export const STANDARD_FATE_TABS = new Set(['reroll', 'rerollDamage', 'addQS']);
@@ -21,28 +21,30 @@ export const FATE_TAB_LABELS = {
 const MASTER_TAB_IDS = new Set(['beistand', 'fieser', 'gescheitert', 'meisterschicksal', 'meisterRegen', 'masterPlaceholder']);
 const MAGIC_TYPES = new Set(['spell', 'liturgy', 'ritual', 'ceremony', 'magicalsign']);
 
-export const REGEN_BLESSING_CONFIG = {
-    Mada: {
-        resource: 'AsP',
-        prop: 'system.status.regeneration.AsPTemp',
-        maxTotal: 12,
-        maxPerTarget: 3,
-        filterTarget: (actor) => (actor.system?.status?.astralenergy?.max || 0) > 0,
-    },
-    Travia: {
-        resource: 'LeP',
-        prop: 'system.status.regeneration.LePTemp',
-        maxTotal: 12,
-        maxPerTarget: 3,
-        filterTarget: () => true,
-    },
-};
-
 const createTab = (id, activeTab, label = FATE_TAB_LABELS[id]) => ({
     id,
     label,
     cssClass: activeTab === id ? 'active' : '',
 });
+
+function activateFirstTab(app, tabsDef) {
+    const firstKey = Object.keys(tabsDef)[0];
+    if (!firstKey) return null;
+    app.tabGroups.sheet = firstKey;
+    tabsDef[firstKey].cssClass = 'active';
+    return firstKey;
+}
+
+export function isStandardFateTab(app) {
+    return STANDARD_FATE_TABS.has(app?.tabGroups?.sheet) || !!app?.isStandardFateTab;
+}
+
+export function parseTabId(tabId = '') {
+    if (tabId.startsWith('specialAction_')) return { kind: 'specialAction', key: tabId.slice('specialAction_'.length) };
+    if (tabId.startsWith('regenBlessing_')) return { kind: 'regenBlessing', key: tabId.slice('regenBlessing_'.length) };
+    if (tabId.startsWith('xeledon_')) return { kind: 'xeledon', key: 'Xeledon', action: tabId.slice('xeledon_'.length) };
+    return { kind: 'standard', key: null, action: tabId };
+}
 
 export function extractDamageDice(damageRollData, selectedIndices = new Set()) {
     const damageDice = [];
@@ -68,13 +70,13 @@ export function extractDamageDice(damageRollData, selectedIndices = new Set()) {
 function extractD20Dice(app, preData, postData) {
     const type = preData.source?.type;
     const mode = preData.mode;
-    const isCombatRoll = ['meleeweapon', 'rangeweapon', 'dodge', 'trait'].includes(type) || ['attack', 'parry', 'range'].includes(mode);
+    const isCombat = DSA5GodsMenuConfig.isCombatRoll(preData);
     const sheetTab = app.tabGroups.sheet || '';
 
     return (postData.characteristics || [])
         .filter((item) => item.char !== 'damage')
         .map((item, i) => {
-            const attr = isCombatRoll ? (type === 'dodge' ? 'dodge' : (mode || type)) : (item.char || 'd20');
+            const attr = isCombat ? (type === 'dodge' ? 'dodge' : (mode || type)) : (item.char || 'd20');
             const rerollSelected = app.selectedForReroll.has(i);
             return {
                 index: i,
@@ -84,7 +86,7 @@ function extractD20Dice(app, preData, postData) {
                 tooltip: item.tar ? `${_loc(item.char === 'attack' ? 'Attack' : item.char === 'parry' ? 'Parry' : `CHAR.${item.char.toUpperCase()}`)} vs ${item.tar}` : '',
                 rerollSelected,
                 selected: (sheetTab === 'reroll' || sheetTab === 'meisterschicksal' || sheetTab === 'xeledon_reroll') ? rerollSelected : app.selectedForImprove === i,
-                specialSelected: sheetTab.startsWith('specialAction') ? app.selectedForSpecialReroll === i : false,
+                specialSelected: sheetTab.startsWith('specialAction_') ? app.selectedForSpecialReroll === i : false,
             };
         });
 }
@@ -92,7 +94,7 @@ function extractD20Dice(app, preData, postData) {
 // --- Xeledon Helper ---
 
 export function hasAvailableXeledonSchip(actor) {
-    return (Number(foundry.utils.getProperty(actor, 'flags.dsa5.specialPoints.Xeledon.current')) || 0) > 0;
+    return DSA5GodsMenuConfig.getSpecialSchip(actor, 'Xeledon').current > 0;
 }
 
 export function getAvailableXeledonOptions(message, { isSpeakerOwner = false } = {}) {
@@ -104,10 +106,9 @@ export function getAvailableXeledonOptions(message, { isSpeakerOwner = false } =
     if ((data.fateSpecialUsed || []).includes('Xeledon')) return [];
 
     const type = preData.source?.type;
-    const mode = preData.mode;
     if ((postData.rollType || type) === 'regenerate') return [];
 
-    const isCombatRoll = ['meleeweapon', 'rangeweapon', 'dodge', 'trait'].includes(type) || ['attack', 'parry', 'range'].includes(mode);
+    const isCombat = DSA5GodsMenuConfig.isCombatRoll(preData);
     const hasD20Roll = !!postData.characteristics || !!preData.roll;
     const hasDamageRoll = !!postData.damageRoll;
     const canSeeDamage = data.hideDamage !== true || isSpeakerOwner || game.user.isGM;
@@ -116,7 +117,7 @@ export function getAvailableXeledonOptions(message, { isSpeakerOwner = false } =
     const options = [];
     if (hasD20Roll && !data.fatePointRerollUsed) options.push('reroll');
     if (hasDamageRoll && canSeeDamage && !data.fatePointDamageRerollUsed) options.push('rerollDamage');
-    if (successLevel > 0 && !data.fatePointAddQSUsed && Number(postData.qualityStep) > 1 && !isCombatRoll) options.push('addQS');
+    if (successLevel > 0 && !data.fatePointAddQSUsed && Number(postData.qualityStep) > 1 && !isCombat) options.push('addQS');
 
     return options;
 }
@@ -154,7 +155,7 @@ function buildXeledonTabEntries(options, activeTab) {
     const list = [];
     for (const opt of options) {
         const id = `xeledon_${opt}`;
-        const label = `${_loc(FATE_TAB_LABELS[opt])} (Xeledon)`;
+        const label = _loc('GodsMenu.FateTab.XeledonActionLabel', { label: _loc(FATE_TAB_LABELS[opt]) });
         const tab = createTab(id, activeTab, label);
         xeledonTabs[opt] = tab;
         list.push(tab);
@@ -199,11 +200,10 @@ export function getEligibleCompanions(caster, message, key) {
 export function getAvailableRegenBlessingKeys(actor, message) {
     if (!actor || !message) return [];
     const used = message.flags?.data?.fateSpecialUsed || [];
-    const specialPoints = foundry.utils.getProperty(actor, 'flags.dsa5.specialPoints') || {};
 
     return Object.keys(REGEN_BLESSING_CONFIG).filter(
         (key) => !used.includes(key)
-            && (Number(specialPoints[key]?.current) || 0) > 0
+            && DSA5GodsMenuConfig.getSpecialSchip(actor, key).current > 0
             && getEligibleCompanions(actor, message, key).length > 0,
     );
 }
@@ -246,19 +246,17 @@ export function buildExternalXeledonFateContext(app) {
     for (const tab of list) tabsDef[tab.id] = tab;
 
     if (list.length && !tabsDef[app.tabGroups.sheet]) {
-        const first = list[0];
-        app.tabGroups.sheet = first.id;
-        first.cssClass = 'active';
+        activateFirstTab(app, tabsDef);
     } else if (!list.length) {
         tabsDef.noOption = createTab('noOption', 'noOption');
         app.tabGroups.sheet = 'noOption';
     }
 
-    const sData = foundry.utils.getProperty(app.dsaActor, 'flags.dsa5.specialPoints.Xeledon');
-    const label = `${DSA5GodsMenuConfig.schipName('Xeledon')}-Schip`;
-    const imgStyle = `background-image: url('${DSA5GodsMenuConfig.chipIcon('Xeledon')}');`;
-    const specialSchips = sData?.value > 0
-        ? DSA5GodsMenuConfig.buildSchipDots(sData.value, sData.current || 0, (isFull) => ({
+    const { current, max } = DSA5GodsMenuConfig.getSpecialSchip(app.dsaActor, 'Xeledon');
+    const label = DSA5GodsMenuConfig.schipLabel('Xeledon');
+    const imgStyle = DSA5GodsMenuConfig.chipStyle('Xeledon');
+    const specialSchips = max > 0
+        ? DSA5GodsMenuConfig.buildSchipDots(max, current, (isFull) => ({
             key: 'Xeledon',
             tooltip: label,
             imgStyle,
@@ -292,7 +290,7 @@ export function buildExternalXeledonFateContext(app) {
         isSpecialPool: true,
         hasSpecial: specialSchips.length > 0,
         specialSchipDescription: DSA5GodsMenuConfig.schipDescription('Xeledon'),
-        hasFateAction: list.length > 0 && (sData?.current || 0) > 0,
+        hasFateAction: list.length > 0 && current > 0,
         isGM: game.user.isGM,
     };
 }
@@ -315,19 +313,17 @@ export function buildRollRequestFateContext(app) {
     const specialSchips = [];
 
     if (app.dsaActor) {
-        const specialPointsObj = foundry.utils.getProperty(app.dsaActor, 'flags.dsa5.specialPoints') || {};
-
         for (const key of availableKeys) {
             const tabId = `regenBlessing_${key}`;
-            const label = `${DSA5GodsMenuConfig.schipName(key)}-Schip`;
+            const label = DSA5GodsMenuConfig.schipLabel(key);
             const tab = createTab(tabId, app.tabGroups.sheet, label);
 
             tabsDef[tabId] = tab;
             regenBlessingTabs.push({ ...tab, description: DSA5GodsMenuConfig.schipDescription(key) });
 
-            const sData = specialPointsObj[key];
-            const imgStyle = `background-image: url('${DSA5GodsMenuConfig.chipIcon(key)}');`;
-            specialSchips.push(...DSA5GodsMenuConfig.buildSchipDots(sData.value, sData.current, (isFull) => ({
+            const { current, max } = DSA5GodsMenuConfig.getSpecialSchip(app.dsaActor, key);
+            const imgStyle = DSA5GodsMenuConfig.chipStyle(key);
+            specialSchips.push(...DSA5GodsMenuConfig.buildSchipDots(max, current, (isFull) => ({
                 key,
                 tooltip: label,
                 imgStyle,
@@ -348,7 +344,7 @@ export function buildRollRequestFateContext(app) {
     const canSwitchActor = eligibleActors.length > 1;
 
     return {
-        showActorHeader: true,
+        showActorHeader: canSwitchActor,
         showFateBody: !!app.dsaActor,
         actor: app.dsaActor,
         availableActors: eligibleActors.map((a) => ({ id: a.id, name: a.name, img: a.img })),
@@ -371,6 +367,7 @@ export async function buildUnifiedFateContext(app, baseContext) {
     const data = app.message.flags.data;
     const postData = data.postData;
     const preData = data.preData;
+    const hasRealMessage = Boolean(app.message?.id);
 
     const rollName = preData.source?.name || '';
     const usedSpecialKeys = data.fateSpecialUsed || [];
@@ -383,7 +380,7 @@ export async function buildUnifiedFateContext(app, baseContext) {
     const mode = preData.mode;
     const isRegen = (postData.rollType || type) === 'regenerate';
 
-    const isCombatRoll = ['meleeweapon', 'rangeweapon', 'dodge', 'trait'].includes(type) || ['attack', 'parry', 'range'].includes(mode);
+    const isCombat = DSA5GodsMenuConfig.isCombatRoll(preData);
     const isAttack = mode === 'attack' || postData.characteristics?.some((c) => c.char === 'attack');
     const isParry = mode === 'parry' || postData.characteristics?.some((c) => c.char === 'parry');
     const isRange = type === 'rangeweapon' || mode === 'range';
@@ -402,7 +399,7 @@ export async function buildUnifiedFateContext(app, baseContext) {
 
     const hasD20Roll = !isRegen && (!!postData.characteristics || !!preData.roll);
     const hasDamageRoll = !!postData.damageRoll;
-    const canAddQS = successLevel > 0 && !data.fatePointAddQSUsed && postData.qualityStep !== undefined && !isCombatRoll;
+    const canAddQS = successLevel > 0 && !data.fatePointAddQSUsed && postData.qualityStep !== undefined && !isCombat;
 
     const tabsDef = {};
     if (hasD20Roll && !data.fatePointRerollUsed) tabsDef.reroll = createTab('reroll', app.tabGroups.sheet);
@@ -410,14 +407,10 @@ export async function buildUnifiedFateContext(app, baseContext) {
     if (hasD20Roll && canImprove && !data.fateImproved) tabsDef.improve = createTab('improve', app.tabGroups.sheet);
     if (canAddQS) tabsDef.addQS = createTab('addQS', app.tabGroups.sheet);
 
-    const isSpecialSubTab = (id) => id.startsWith('specialAction_') || id.startsWith('xeledon_');
-    const currentTab = app.tabGroups.sheet || '';
-    if (!tabsDef[currentTab] && !isSpecialSubTab(currentTab) && !MASTER_TAB_IDS.has(currentTab)) {
-        const firstTab = Object.keys(tabsDef)[0];
-        if (firstTab) {
-            app.tabGroups.sheet = firstTab;
-            tabsDef[firstTab].cssClass = 'active';
-        }
+    const parsedCurrent = parseTabId(app.tabGroups.sheet);
+    const isSpecialSubTab = parsedCurrent.kind === 'specialAction' || parsedCurrent.kind === 'xeledon';
+    if (!tabsDef[app.tabGroups.sheet] && !isSpecialSubTab && !MASTER_TAB_IDS.has(app.tabGroups.sheet)) {
+        activateFirstTab(app, tabsDef);
     }
 
     const dice = extractD20Dice(app, preData, postData);
@@ -455,7 +448,7 @@ export async function buildUnifiedFateContext(app, baseContext) {
     const groupTooltip = _loc('FORMULA.groupFatePoints');
     const groupSchips = DSA5GodsMenuConfig.buildSchipDots(grpMax, grpCur, () => ({ tooltip: groupTooltip }));
 
-    const xeledonOptions = getAvailableXeledonOptions(app.message, { isSpeakerOwner: true });
+    const xeledonOptions = hasRealMessage ? getAvailableXeledonOptions(app.message, { isSpeakerOwner: true }) : [];
 
     const specialSchips = [];
     let activeSpecialTab = null;
@@ -476,8 +469,8 @@ export async function buildUnifiedFateContext(app, baseContext) {
             if (isGod) hasGodChips = true;
             else hasDemonChips = true;
 
-            const imgStyle = `background-image: url('${DSA5GodsMenuConfig.chipIcon(key)}');`;
-            const label = `${DSA5GodsMenuConfig.schipName(key)}-Schip`;
+            const imgStyle = DSA5GodsMenuConfig.chipStyle(key);
+            const label = DSA5GodsMenuConfig.schipLabel(key);
 
             if ((sData.current || 0) > 0 && app.selectedPool === 'special' && app.selectedSpecialKey === key && !usedSpecialKeys.includes(key)) {
                 if (isQsAndReroll) {
@@ -503,12 +496,9 @@ export async function buildUnifiedFateContext(app, baseContext) {
 
     const masterSetting = game.user.isGM ? DSA5GodsMenuConfig.getSchipSetting('masterschips') : { current: 0, max: 0 };
     const hasMaster = masterSetting.max > 0;
-    const masterTooltip = _loc('GodsMenu.masterFatePointsTooltip');
-    const masterSchips = DSA5GodsMenuConfig.buildSchipDots(masterSetting.max, masterSetting.current, (isFull, i) => ({
-        value: i + 1,
-        img: isFull ? 'systems/dsa5/icons/meisterschip.webp' : 'systems/dsa5/icons/gray_meisterschip.webp',
-        tooltip: masterTooltip,
-    }));
+    const masterSchips = DSA5GodsMenuConfig.buildMasterSchipDots(masterSetting.max, masterSetting.current, {
+        tooltip: _loc('GodsMenu.masterFatePointsTooltip'),
+    });
 
     const masterTabsDef = {};
     const isPC = app.dsaActor.hasPlayerOwner;
@@ -521,8 +511,8 @@ export async function buildUnifiedFateContext(app, baseContext) {
         masterTabsDef.fieser = createTab('fieser', app.tabGroups.sheet);
     }
 
-    const isSuccess = successLevel > 0 || postData.result?.success || postData.success;
-    const isCrit = (successLevel > 2) || postData.result?.critical;
+    const isSuccess = successLevel > 0 || postData.success;
+    const isCrit = successLevel > 2 || postData.critical;
     const failCost = isCrit ? 3 : 2;
     if (game.user.isGM && isPC && (isAttack || isRange) && isSuccess && !MAGIC_TYPES.has(type) && masterSetting.current >= failCost) {
         masterTabsDef.gescheitert = createTab('gescheitert', app.tabGroups.sheet);
@@ -554,23 +544,15 @@ export async function buildUnifiedFateContext(app, baseContext) {
     if (app.selectedPool === 'master') {
         for (const key in tabsDef) delete tabsDef[key];
         Object.assign(tabsDef, masterTabsDef);
-        if (!tabsDef[app.tabGroups.sheet]) {
-            const firstMasterKey = Object.keys(tabsDef)[0];
-            app.tabGroups.sheet = firstMasterKey;
-            tabsDef[firstMasterKey].cssClass = 'active';
-        }
+        if (!tabsDef[app.tabGroups.sheet]) activateFirstTab(app, tabsDef);
         activeSpecialTab = null;
         activeSpecialTabs = [];
         xeledonTabs = {};
     } else if (
         !activeSpecialTabs.some((t) => t.id === app.tabGroups.sheet)
-        && (isSpecialSubTab(app.tabGroups.sheet || '') || MASTER_TAB_IDS.has(app.tabGroups.sheet))
+        && (isSpecialSubTab || MASTER_TAB_IDS.has(app.tabGroups.sheet))
     ) {
-        const firstTab = Object.keys(tabsDef)[0];
-        if (firstTab) {
-            app.tabGroups.sheet = firstTab;
-            tabsDef[firstTab].cssClass = 'active';
-        }
+        activateFirstTab(app, tabsDef);
     }
 
     if (Object.keys(tabsDef).length === 0 && !activeSpecialTabs.length) {
@@ -578,7 +560,7 @@ export async function buildUnifiedFateContext(app, baseContext) {
         app.tabGroups.sheet = 'noOption';
     }
 
-    const isStandardTab = STANDARD_FATE_TABS.has(app.tabGroups.sheet);
+    const isStandardTab = isStandardFateTab(app);
     for (const chip of specialSchips) {
         if (STANDARD_ONLY_SPECIAL_KEYS.has(chip.key)) {
             chip.isRelevant = chip.isRelevant && isStandardTab;
@@ -611,7 +593,7 @@ export async function buildUnifiedFateContext(app, baseContext) {
         masterCost = _loc('GodsMenu.FateTab.MasterFailedCostDetail', { type: attackType, cost: failCost });
     }
 
-    const switchActors = getRollCardSwitchActors(app.message, app.targetActor);
+    const switchActors = hasRealMessage ? getRollCardSwitchActors(app.message, app.targetActor) : [];
     const showActorHeader = switchActors.length > 1;
 
     return {
