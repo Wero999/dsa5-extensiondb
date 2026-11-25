@@ -1,6 +1,6 @@
-import { DSA5GodsMenuConfig } from './config.js';
+import { DSA5GodsMenuConfig, REGEN_BLESSING_CONFIG } from './config.js';
 import { DiceDSA5, DSA5_Utility } from './dsa5-api.js';
-import { REGEN_BLESSING_CONFIG } from './fate-context.js';
+import { promptManualConditions } from './fate-dialogs.js';
 
 export const DEMON_SCHIP_REGEN_ID = 'demonSchipRegen';
 const REGEN_BLESSING_QUERY = `${DSA5GodsMenuConfig.MODULE_ID}.applyRegenBlessing`;
@@ -26,12 +26,60 @@ const DEMON_REMOVALS = {
     Tasfarel: { manualLevels: 3 },
 };
 
+function verifyCasterPermission(casterId, key, user = game.user) {
+    if (!user) return false;
+    const caster = game.actors.get(casterId);
+    if (!caster) return false;
+    if (!user.isGM && !caster.testUserPermission(user, 'OWNER')) return false;
+    return DSA5GodsMenuConfig.getSpecialSchip(caster, key).current > 0;
+}
+
+async function delegateToGM(queryName, localFn, payload) {
+    if (game.user.isGM) return localFn(payload);
+
+    const activeGM = game.users.activeGM;
+    if (!activeGM) return { ok: false, reason: 'noGM' };
+
+    try {
+        return await activeGM.query(queryName, payload);
+    } catch {
+        return { ok: false, reason: 'noGM' };
+    }
+}
+
 export function getDemonConditionRemovals(specialKey) {
     const entry = DEMON_REMOVALS[specialKey];
     return {
         autoConditions: [...(entry?.auto || [])],
         manualLevels: entry?.manualLevels || 0,
     };
+}
+
+export async function prepareDemonConditionRemovals(actor, specialKey) {
+    const { autoConditions, manualLevels } = getDemonConditionRemovals(specialKey);
+    let manualReductions = {};
+
+    if (manualLevels > 0) {
+        const availableConditions = [];
+        for (const effect of actor.effects) {
+            const statusId = Array.from(effect.statuses)[0];
+            if (statusId && !autoConditions.includes(statusId)) {
+                const val = effect.system?.condition?.value || effect.getFlag('dsa5', 'value') || 1;
+                availableConditions.push({ id: statusId, name: effect.name, value: val, img: effect.img || effect.icon });
+            }
+        }
+
+        if (availableConditions.length > 0) {
+            const result = await promptManualConditions(actor, availableConditions, manualLevels);
+            if (result === null) {
+                ui.notifications.warn(_loc('GodsMenu.FateTab.ActionCancelled'));
+                return null;
+            }
+            manualReductions = result;
+        }
+    }
+
+    return { conditionsToRemove: autoConditions, manualReductions };
 }
 
 export async function applyDemonConditionRemovals(actor, autoConditions, manualReductions) {
@@ -63,9 +111,10 @@ export async function clearDemonSchipRegen(actor) {
     await actor.removeCondition(DEMON_SCHIP_REGEN_ID, 0, false, true);
 }
 
-async function executeRegenBlessingUpdates({ key, casterId, messageId, allocations }) {
+async function executeRegenBlessingUpdates({ key, casterId, messageId, allocations }, { user } = {}) {
     const cfg = REGEN_BLESSING_CONFIG[key];
     if (!cfg || !Array.isArray(allocations)) return { ok: false, reason: 'invalid' };
+    if (!verifyCasterPermission(casterId, key, user)) return { ok: false, reason: 'unauthorized' };
 
     const lockKey = `${messageId}:${key}`;
     if (pendingRegenBlessings.has(lockKey)) return { ok: false, reason: 'alreadyUsed' };
@@ -102,20 +151,12 @@ async function executeRegenBlessingUpdates({ key, casterId, messageId, allocatio
     }
 }
 
-export async function applyRegenBlessing(payload) {
-    if (game.user.isGM) return executeRegenBlessingUpdates(payload);
-
-    const activeGM = game.users.activeGM;
-    if (!activeGM) return { ok: false, reason: 'noGM' };
-
-    try {
-        return await activeGM.query(REGEN_BLESSING_QUERY, payload);
-    } catch {
-        return { ok: false, reason: 'noGM' };
-    }
+export function applyRegenBlessing(payload) {
+    return delegateToGM(REGEN_BLESSING_QUERY, executeRegenBlessingUpdates, payload);
 }
 
-async function executeXeledonRollUpdate({ messageId, postFunction, testData, cardOptions, flagUpdates, clearTargets }) {
+async function executeXeledonRollUpdate({ casterId, messageId, postFunction, testData, cardOptions, flagUpdates, clearTargets }, { user } = {}) {
+    if (!verifyCasterPermission(casterId, 'Xeledon', user)) return { ok: false, reason: 'unauthorized' };
     if (pendingXeledonUpdates.has(messageId)) return { ok: false, reason: 'alreadyUsed' };
     pendingXeledonUpdates.add(messageId);
 
@@ -149,30 +190,13 @@ async function executeXeledonRollUpdate({ messageId, postFunction, testData, car
     }
 }
 
-export async function applyXeledonRollUpdate(payload) {
-    if (game.user.isGM) return executeXeledonRollUpdate(payload);
-
-    const activeGM = game.users.activeGM;
-    if (!activeGM) return { ok: false, reason: 'noGM' };
-
-    try {
-        return await activeGM.query(XELEDON_ROLL_QUERY, payload);
-    } catch {
-        return { ok: false, reason: 'noGM' };
-    }
+export function applyXeledonRollUpdate(payload) {
+    return delegateToGM(XELEDON_ROLL_QUERY, executeXeledonRollUpdate, payload);
 }
 
-function registerQueries() {
-    if (!CONFIG.queries) return;
+Hooks.once('init', () => {
     CONFIG.queries[REGEN_BLESSING_QUERY] = executeRegenBlessingUpdates;
     CONFIG.queries[XELEDON_ROLL_QUERY] = executeXeledonRollUpdate;
-}
-registerQueries();
-Hooks.once('init', registerQueries);
-
-DSA5GodsMenuConfig.registerSocketHandler('applyRegenBlessing', async (payload) => {
-    if (!game.users.activeGM?.isSelf) return;
-    await executeRegenBlessingUpdates(payload);
 });
 
 Hooks.on('preUpdateActor', (actor, changes, options) => {
