@@ -16,7 +16,6 @@ const DEMONS_CATALOG = DSA5GodsMenuConfig.demonListNames.map((id) => ({
 }));
 
 export default class GodsMenu extends HandlebarsApplicationMixin(ApplicationV2) {
-    static SOCKET = DSA5GodsMenuConfig.SOCKET;
     static MASTER_ID = 'dsa-gods-menu';
     static PLAYER_ID = 'dsa-gods-menu-player';
     static playerSession = null;
@@ -198,10 +197,6 @@ export default class GodsMenu extends HandlebarsApplicationMixin(ApplicationV2) 
             return;
         }
         new GodsMenu({ mode }).render(true);
-    }
-
-    static registerSocket() {
-        DSA5GodsMenuConfig.initSocket();
     }
 
     static _onOpenDetail(ev, target) {
