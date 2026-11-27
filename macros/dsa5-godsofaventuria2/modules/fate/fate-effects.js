@@ -9,10 +9,10 @@ const pendingRegenBlessings = new Set();
 const pendingXeledonUpdates = new Set();
 
 const DEMON_REMOVALS = {
-    Amazeroth: { auto: ['confusion'] },
-    Heskatet: { auto: ['confusion'] },
-    Aphasmayra: { auto: ['paralyzed'] },
-    Lolgramoth: { auto: ['paralyzed'] },
+    Amazeroth: { auto: ['confused'] },
+    Heskatet: { auto: ['confused'] },
+    Aphasmayra: { auto: ['paralysed'] },
+    Lolgramoth: { auto: ['paralysed'] },
     Aphestadil: { auto: ['stunned'] },
     Charyptoroth: { auto: ['stunned'] },
     Belhalhar: { auto: ['inpain'] },
@@ -63,7 +63,7 @@ export async function prepareDemonConditionRemovals(actor, specialKey) {
         const availableConditions = [];
         for (const effect of actor.effects) {
             const statusId = Array.from(effect.statuses)[0];
-            if (statusId && !autoConditions.includes(statusId)) {
+            if (statusId && statusId !== DEMON_SCHIP_REGEN_ID && !autoConditions.includes(statusId)) {
                 const val = effect.system?.condition?.value || effect.getFlag('dsa5', 'value') || 1;
                 availableConditions.push({ id: statusId, name: effect.name, value: val, img: effect.img || effect.icon });
             }
